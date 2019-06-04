@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+set -eu
+
+readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+readonly JAVADIR="$DIR/../lib/scala.spfx/lang.scala"
+if [ ! -d "$JAVADIR" ]; then
+    echo "FAILURE: Cannot find directory $JAVADIR"
+    exit 1
+fi
+
+readonly SUNSHINE="$DIR/../bin/org.metaborg.sunshine2-2.5.2.jar"
+if [ ! -f "$SUNSHINE" ]; then
+    echo "FAILURE: Cannot find file $SUNSHINE"
+    exit 1
+fi
+
+readonly ATERM="java -jar $SUNSHINE parse -l $JAVADIR -p . -i"
+
+for infile in "$@"
+do
+    if ! (echo $infile | grep -s "no.scala") 
+    then
+        positive=0
+	echo "Expect pass"
+    else
+        positive=1
+	echo "Expect fail"
+    fi
+
+    # make sure to remove all class files to avoid incidental capture
+    rm -f $(dirname "$infile")/*.class
+
+    # run scala compiler
+    scalac $infile 2>&1 | tee ${infile%.scala}.scalac.out 
+    scala_ok=${PIPESTATUS[0]}
+
+    # compile the file to an aterm
+    sca=${infile%.scala}.sca
+    cp "$infile" $sca
+    ${ATERM} ${infile%.scala}.sca > ${infile%.scala}.aterm 2> /dev/null
+
+    # run statix on the aterm
+    statix check -I $DIR/../src/ scala ${infile%.scala}.aterm 2>&1 | tee ${infile%.scala}.stx.out
+    stx_ok=${PIPESTATUS[0]}
+
+    # compute test result by comparison
+    if [ $scala_ok -eq $stx_ok -a $scala_ok -eq $positive ]
+    then
+	echo -e "[\e[32mSUCCESS\e[0m] $infile"
+    else
+	echo -e "[\e[31mFAILURE\e[0m] $infile"
+    fi
+done
