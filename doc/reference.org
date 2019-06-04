@@ -1,0 +1,4 @@
+* Scala Reference
+
+- [[https://www.scala-lang.org/files/archive/spec/2.12/13-syntax-summary.html][Grammar]]
+- [[https://www.scala-lang.org/files/archive/spec/2.12/02-identifiers-names-and-scopes.html][Identifiers]]
