@@ -3,8 +3,10 @@
 set -eu
 
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+readonly BUILD="$DIR/../build/"
+mkdir -p $BUILD
 
-readonly SCALADIR="$DIR/../lib/scala.spfx/lang.scala"
+readonly SCALADIR="$DIR/../lib/scala.spfx/lang.scala.sdf3"
 if [ ! -d "$SCALADIR" ]; then
     echo "FAILURE: Cannot find directory $SCALADIR"
     exit 1
@@ -33,7 +35,7 @@ do
     rm -f $(dirname "$infile")/*.class
 
     # run scala compiler
-    scalac -d build/ $infile 2>&1 | tee ${infile%.scala}.scalac.out 
+    scalac -d $BUILD $infile 2>&1 | tee ${infile%.scala}.scalac.out 
     scala_ok=${PIPESTATUS[0]}
 
     # compile the file to an aterm

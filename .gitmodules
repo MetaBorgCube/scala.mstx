@@ -1,0 +1,3 @@
+[submodule "lib/scala.spfx"]
+	path = lib/scala.spfx
+	url = git@github.com:MetaBorgCube/scala.sdf3.git
