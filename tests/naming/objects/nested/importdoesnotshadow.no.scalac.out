@@ -1,0 +1,6 @@
+tests/naming/objects/nested/importdoesnotshadow.no.scala:9: error: reference to f is ambiguous;
+it is both defined in object B and imported subsequently by
+import A.f
+     def g = f // ambiguous
+             ^
+one error found
