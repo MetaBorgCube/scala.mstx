@@ -3,7 +3,7 @@ SCALA_FRONT  =  lib/scala.spfx/lang.scala/
 SUNSHINE_URL =  http://artifacts.metaborg.org/service/local/repositories/releases/content/org/metaborg/org.metaborg.sunshine2/2.5.2/org.metaborg.sunshine2-2.5.2.jar
 SUNSHINE_JAR =  bin/org.metaborg.sunshine2-2.5.2.jar
 SPEC         =  src/scala.mstx
-TESTS        ?= tests/   # directory
+TESTDIR      ?= tests/   # directory
 TESTRE       ?= '*.scala' # iname
 
 ## external commands with configuration
@@ -14,7 +14,7 @@ PARSE        = $(SUNSHINE) parse -l $(SCALA_FRONT) -p . -i
 STATIX       = statix $(SPEC)
 SCALAC       = scalac
 
-TESTS        = $(shell find $(TESTS) -iname $(TESTRE))
+TESTS        = $(shell find $(TESTDIR) -iname $(TESTRE))
 
 TEST_TARGETS = $(TESTS:%.scala=%.result)
 
