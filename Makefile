@@ -14,7 +14,7 @@ PARSE        = $(SUNSHINE) parse -l $(SCALA_FRONT) -p . -i
 STATIX       = statix $(SPEC)
 SCALAC       = scalac
 
-TESTS        = $(shell find $(TESTDIR) -iname $(TESTRE))
+TESTS        = $(shell find $(TESTDIR) -name $(TESTRE))
 
 TEST_TARGETS = $(TESTS:%.scala=%.result)
 
@@ -58,14 +58,14 @@ scalafront: lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-0.1.0-SNAPSHOT
 
 test: $(TEST_TARGETS)
 test-results: 
-	find . -iname '*.result' -exec sh -c "cat {} | grep -i 'failure\|success'" \;
+	find . -name '*.result' -exec sh -c "cat {} | grep -i 'failure\|success'" \;
 
 ## Building
 
 ## Cleaning
 
 test-clean:
-	find -iname "*.class" -exec rm {} \;
-	find -iname "*.aterm" -exec rm {} \;
-	find -iname "*.result" -exec rm {} \;
-	find -iname "*.out" -exec rm {} \;
+	find . -name "*.class" -exec rm {} \;
+	find . -name "*.aterm" -exec rm {} \;
+	find . -name "*.result" -exec rm {} \;
+	find . -name "*.out" -exec rm {} \;

@@ -1,0 +1,14 @@
+// s is the target scope of a path p
+tgt(p,s) :- p match
+  { End(x)       -> s == x
+  | Edge(x,l,xs) -> tgt(xs,s)
+  }.
+
+// s is the source scope of a path p
+src(p,s) :- p match
+  { End(x)       -> s == x
+  | Edge(x,l,xs) -> s == x
+  }.
+
+// d is the datum of the target of p
+datum(p,d) :- {s} tgt(p, s), s -> d.

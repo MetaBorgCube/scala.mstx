@@ -1,0 +1,20 @@
+import scala.templates
+
+main(prog) :- {s_pkg}
+  new s_pkg
+  , compilation-unit-ok(s_pkg, prog).
+
+compilation-unit-ok(s_pkg, cu) :- {cu_s}
+  new cu_s
+  , cu_s -[ `LEX ]-> s_pkg
+  , cu match { CompilationUnit(_, topstats) -> top-statements-ok(cu_s, topstats) }.
+
+top-statements-ok(s, topstats) :- topstats match
+  { st:stmts -> top-statement-ok(s, st), top-statements-ok(s, stmts)
+  | []       -> true
+  }.
+
+top-statement-ok(s, stat) :- stat match
+  { DF2TS(ann, mod, def) -> definition-ok(s, def)
+  }.
+

@@ -1,0 +1,27 @@
+import stdlib.sets
+
+// Is this what Scala does? Distinguishes values (objects, ...) and types (classes, traits, ...)?
+no-duplicate-values(s, name, ty) :- {defs, matches}
+    query s `OBJ|`DEF as defs
+  , filter defs ((name', ty') where name' == name, ty' != ty) matches
+  , empty(matches).
+
+definition-ok(s, def) :- def match
+  { ObjectDef(name, ext_clause, body) -> {s_obj, self}
+      self == OBJECT(s_obj)
+    , new s_obj -> (name, self)
+    , s_obj -[ `LEX ]-> s
+    , s -[ `OBJ ]-> s_obj
+    , extends-clause-ok(s, s_obj, ext_clause)
+    , template-body-ok(s_obj, body)
+    , no-duplicate-values(s, name, self)
+  }.
+
+extends-clause-ok(s, s_obj, ext_clause) :- ext_clause match
+  { NoExtends() -> true
+  | _           -> false // FIXME
+  }.
+
+template-body-ok(s_obj, body) :- body match
+  { TemplateBody(self_type, stmts) -> true // FIXME
+  }.

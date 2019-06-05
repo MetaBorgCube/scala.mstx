@@ -39,9 +39,9 @@ do
     scala_ok=${PIPESTATUS[0]}
 
     # compile the file to an aterm
-    sca=${infile%.scala}.sca
+    sca=${infile%.scala}.sca3
     cp "$infile" $sca
-    ${ATERM} ${infile%.scala}.sca > ${infile%.scala}.aterm 2> /dev/null
+    ${ATERM} $sca > ${infile%.scala}.aterm 2> /dev/null
 
     # run statix on the aterm
     statix check -I $DIR/../src/ scala ${infile%.scala}.aterm 2>&1 | tee ${infile%.scala}.stx.out
