@@ -1,2 +1,2 @@
-object A {}
+object A {};
 object A {}
