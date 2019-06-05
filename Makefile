@@ -38,7 +38,7 @@ bin/org.metaborg.sunshine2-2.5.2.jar: bin
 sunshine: bin/org.metaborg.sunshine2-2.5.2.jar
 
 # compile the scala frontend
-lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-1.1.0-SNAPSHOT.spoofax-language: $(SCALA_FRONT)
+lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-0.1.0-SNAPSHOT.spoofax-language: $(SCALA_FRONT)
 	cd $(SCALA_FRONT) && $(MAVEN) verify
 
 # ensure the java spoofax language frontend is compiled and available
