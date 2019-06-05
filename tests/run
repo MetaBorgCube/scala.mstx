@@ -50,8 +50,8 @@ do
     # compute test result by comparison
     if [ $scala_ok -eq $stx_ok -a $scala_ok -eq $positive ]
     then
-	echo -e "[\e[32mSUCCESS\e[0m] $infile"
+	printf "[\e[32mSUCCESS\e[0m] $infile"
     else
-	echo -e "[\e[31mFAILURE\e[0m] $infile"
+	printf "[\e[31mFAILURE\e[0m] $infile"
     fi
 done
