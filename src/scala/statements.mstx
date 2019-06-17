@@ -1,0 +1,14 @@
+import scala.def
+
+stmts-ok(s_obj, stmts) :- stmts match
+  { [] -> true
+  | stmt:stmts ->
+      stmt-ok(s_obj, stmt)
+    , stmts-ok(s_obj, stmts)
+  }.
+
+stmt-ok(s_obj, stmt) :- stmt match
+  { DF2TM(annot, modif, def) ->
+      def-ok(s_obj, def)
+  | _ -> false // FIXME
+  }.

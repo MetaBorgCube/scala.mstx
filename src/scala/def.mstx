@@ -1,0 +1,15 @@
+def-ok(s, def) :- {s_def, defname, rt}
+  def match
+  { Fd2df(fs) -> fs match
+      { FunSig(FS(fname, pclause, pclauses), rt, expr) -> true
+      }
+  }.
+        //   funsig-ok(s, sig, s_def, defname)
+        // , rt match
+        //   { NoTypeAnnot() ->
+        //       infer-expr(s_def, e, ty)
+        //     , s_def -[ `
+        //   | TypeAnnot(t) ->
+        //     false // FIXME
+        //   }
+
