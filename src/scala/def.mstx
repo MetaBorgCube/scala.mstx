@@ -1,5 +1,12 @@
+import stdlib.lists
+import stdlib.sets
 import scala.type
 import scala.expr
+
+no-duplicate-defs(s, name, ty) :- {defs, matches}
+    query s `DEF as defs
+  , filter defs ((name', ty') where name' == name, ty' == ty) matches
+  , empty(matches).
 
 def-ok(s, def) :- def match
   { FD2DF(fs) -> fs match
@@ -22,16 +29,19 @@ fun-ok(s, sig, expr, rty) :- sig match
   }.
 
 pclauses-ok(s, s_f, fname, pclauses, param_tys, expr, rty) :- pclauses match
-  { [] -> {t, s_def}
+  { [] -> {t, s_def, def_ty}
       expr-ok(s_f, expr, rty)
-    , new s_def -> METH(param_tys, rty) // FIXME: param_tys should be reversed first
+    , def_ty == METH(param_tys, rty)
+    , no-duplicate-defs(s, fname, def_ty)
+    , new s_def -> (fname, def_ty)
     , s -[ `DEF ]-> s_def
   | pclause:pclauses -> pclause match
-      { ParamClause(params) -> {s_f_inner, tys}
+      { ParamClause(params) -> {s_f_inner, tys, param_tys1}
           new s_f_inner
         , s_f_inner -[ `LEX ]-> s_f
         , params-ok(s_f_inner, params, tys)
-        , pclauses-ok(s, s_f_inner, fname, pclauses, tys:param_tys, expr, rty)
+        , append(param_tys, tys:[], param_tys1)
+        , pclauses-ok(s, s_f_inner, fname, pclauses, param_tys1, expr, rty)
       }
   }.
 

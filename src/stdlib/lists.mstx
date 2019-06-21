@@ -1,0 +1,14 @@
+reverse(xs, ys) :- reverse-acc(xs, [], ys).
+
+reverse-acc(xs, acc, ys) :- xs match
+  { [] -> ys == acc
+  | x:xs ->
+      reverse-acc(xs, x:acc, ys)
+  }.
+
+append(xs, ys, zs) :- xs match
+  { [] -> ys == zs
+  | x:xs -> {zs0}
+      append(xs, ys, zs0)
+    , zs == x:zs0
+  }.

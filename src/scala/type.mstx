@@ -21,6 +21,7 @@ annot-type-ok(s, annot_t, ty) :- annot_t match
     , d match { (_, ty0) -> ty == ty0 }
   }.
 
+// Resolve a type in the prelude
 prelude-type(s, id, ty) :- {types, matches, visible, p, d}
     query s (`LEX* `PRELUDE `TYPE) as types
   , filter types ((name, _) where name == id) matches
