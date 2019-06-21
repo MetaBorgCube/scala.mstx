@@ -20,6 +20,20 @@ fi
 
 readonly ATERM="java -jar $SUNSHINE parse -l $SCALADIR -p . -i"
 
+if true || test -t 1; then
+   SUCCESS="[\e[32mSUCCESS\e[0m]"
+   FAILURE="[\e[31mFAILURE\e[0m]"
+   STUCK="[\e[34mSTUCK\e[0m]"
+else
+    SUCCESS="[SUCCESS]"
+    FAILURE="[FAILURE]"
+    STUCK="[STUCK]"
+fi
+
+function agree {
+    [ $1 -eq 0 -a $2 -eq 0 ] || [ $1 -ne 0 -a $2 -ne 0 ]
+}
+
 for infile in "$@"
 do
     if ! (echo $infile | grep -s "no.scala") 
@@ -46,12 +60,13 @@ do
     # run statix on the aterm
     statix check -I $DIR/../src/ scala ${infile%.scala}.aterm 2>&1 | tee ${infile%.scala}.stx.out
     stx_ok=${PIPESTATUS[0]}
-
+    
     # compute test result by comparison
-    if [ $scala_ok -eq $stx_ok -a $scala_ok -eq $positive ]
-    then
-	printf "[\e[32mSUCCESS\e[0m] $infile"
+    if [ $stx_ok -eq 65 ]; then
+        printf "$STUCK $infile"
+    elif agree $stx_ok $scala_ok && agree $scala_ok $positive; then
+        printf "$SUCCESS $infile"
     else
-	printf "[\e[31mFAILURE\e[0m] $infile"
+        printf "$FAILURE $infile"
     fi
 done
