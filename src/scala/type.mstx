@@ -1,15 +1,31 @@
+import stdlib.paths
+
 type-ok(s, t, ty) :- t match
-  { FunType(arg_t, ret_t) -> arg_t match
-      { IFT2AT(arg_it) -> {arg_ty, ret_ty}
+  { FunTy(arg_t, ret_t) -> arg_t match
+      { IFT2FAT(arg_it) -> {arg_ty, ret_ty}
           annot-type-ok(s, arg_it, arg_ty)
         , type-ok(s, ret_t, ret_ty)
         , ty == FUNTY(arg_ty, ret_ty)
       }
+  | IF2TY(t) ->
+      annot-type-ok(s, t, ty)
   }.
   
 annot-type-ok(s, annot_t, ty) :- annot_t match
-  { ST2AT(simple_t, annot_opt) -> simple_t match
-      { IntType() -> ty == INT()
-      | _ -> false // FIXME
-      }
+  { ST2AT(Id(id), annot_opt) -> {types, matches, visible, p, d}
+      query s (`LEX* `PRELUDE? `TYPE) as types
+    , filter types ((name, _) where name == id) matches
+    , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX) visible
+    , only(visible, p)
+    , datum(p, d)
+    , d match { (_, ty0) -> ty == ty0 }
   }.
+
+prelude-type(s, id, ty) :- {types, matches, visible, p, d}
+    query s (`LEX* `PRELUDE `TYPE) as types
+  , filter types ((name, _) where name == id) matches
+  , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX) visible
+  , only(visible, p)
+  , datum(p, d)
+  , d match { (_, ty0) -> ty == ty0 }
+  .

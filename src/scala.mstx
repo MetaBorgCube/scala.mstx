@@ -1,13 +1,29 @@
 import scala.templates
 
-main(prog) :- {s_pkg}
-  new s_pkg
-  , compilation-unit-ok(s_pkg, prog).
+main(prog) :- {s}
+    new s
+  , prelude-ok(s)
+  , compilation-unit-ok(s, prog).
 
-compilation-unit-ok(s_pkg, cu) :- {cu_s}
-  new cu_s
-  , cu_s -[ `LEX ]-> s_pkg
-  , cu match { CompilationUnit(_, topstats) -> top-statements-ok(cu_s, topstats) }.
+compilation-unit-ok(s, cu) :- {s_prelude, s_cu}
+    new s_cu
+  , s_cu -[ `PRELUDE ]-> s
+  , cu match
+      { CompilationUnit(_, topstats) ->
+          top-statements-ok(s_cu, topstats)
+      }.
+
+// Populate root scope with standard library classes, such as Int, Boolean, etc.
+prelude-ok(s) :-
+    builtin-class(s, "Int")
+  , builtin-class(s, "Bool")
+  .
+
+builtin-class(s, id) :- {class, s_class}
+    class == CLASS(s_class)
+  , new s_class -> (id, class)
+  , s -[ `TYPE ]-> s_class
+  .
 
 top-statements-ok(s, topstats) :- topstats match
   { st:stmts -> top-statement-ok(s, st), top-statements-ok(s, stmts)

@@ -1,5 +1,12 @@
-expr-ok(s, e, t) :- e match
-  { Num(n) ->
-      t == INT()
+import scala.type
+
+expr-ok(s, e, ty) :- e match
+  { Lit(l) ->
+      literal-ok(s, l, ty)
   | _ -> false // FIXME
+  }.
+
+literal-ok(s, l, ty) :- l match
+  { IntLit(n) ->
+      prelude-type(s, "Int", ty)
   }.
