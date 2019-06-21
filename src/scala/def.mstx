@@ -1,15 +1,52 @@
-def-ok(s, def) :- {s_def, defname, rt}
-  def match
+import scala.type
+import scala.expr
+
+def-ok(s, def) :- def match
   { Fd2df(fs) -> fs match
-      { FunSig(FS(fname, pclause, pclauses), rt, expr) -> true
+      { FunSig(sig, rt, expr) -> rt match
+          { NoTypeAnnot() -> {s_def, t_sem}
+              fun-ok(s, sig, expr)
+          | _ -> false // FIXME
+          }
       }
   }.
-        //   funsig-ok(s, sig, s_def, defname)
-        // , rt match
-        //   { NoTypeAnnot() ->
-        //       infer-expr(s_def, e, ty)
-        //     , s_def -[ `
-        //   | TypeAnnot(t) ->
-        //     false // FIXME
-        //   }
 
+fun-ok(s, sig, expr) :- sig match
+  { FS(fname, ftpclause, pclauses) -> ftpclause match
+      { NoFunTypeParamClause() ->
+          pclauses-ok(s, s, fname, pclauses, [], expr)
+      | _ -> false // FIXME
+      }
+  }.
+
+pclauses-ok(s, s_f, fname, pclauses, param_tys, expr) :- pclauses match
+  { [] -> {t, ty, s_def}
+      expr-ok(s_f, expr, ty)
+    , new s_def -> METH(param_tys, ty)
+    , s -[ `DEF ]-> s_def
+  | pclause:pclauses -> pclause match
+      { ParamClause(params) -> {s_f_inner, tys}
+          new s_f_inner
+        , s_f_inner -[ `LEX ]-> s_f
+        , params-ok(s_f_inner, params, tys)
+        , pclauses-ok(s, s_f_inner, fname, pclauses, tys:param_tys, expr)
+      }
+  }.
+
+params-ok(s, params, tys) :- params match
+  { [] ->
+      tys == []
+  | param:params -> param match
+      { Param(x, t_opt) -> t_opt match
+          { NoParamTypeAnnot() ->
+              false //
+          | PTA2P(t) -> {ty, tys_tail}
+              type-ok(s, t, ty)
+            , params-ok(s, params, tys_tail)
+            , tys == ty:tys_tail
+          }
+      }
+  }.
+
+
+      

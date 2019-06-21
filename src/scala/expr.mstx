@@ -1,0 +1,5 @@
+expr-ok(s, e, t) :- e match
+  { Num(n) ->
+      t == INT()
+  | _ -> false // FIXME
+  }.

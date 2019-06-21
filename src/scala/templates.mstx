@@ -1,4 +1,5 @@
 import stdlib.sets
+import scala.statements
 
 // Is this what Scala does? Distinguishes values (objects, ...) and types (classes, traits, ...)?
 no-duplicate-values(s, name, ty) :- {defs, matches}
@@ -23,5 +24,5 @@ extends-clause-ok(s, s_obj, ext_clause) :- ext_clause match
   }.
 
 template-body-ok(s_obj, body) :- body match
-  { TemplateBody(self_type, stmts) -> true // FIXME
+  { TemplateBody(self_type, stmts) -> stmts-ok(s_obj, stmts) // FIXME
   }.

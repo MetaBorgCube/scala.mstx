@@ -1,0 +1,15 @@
+type-ok(s, t, ty) :- t match
+  { FunType(arg_t, ret_t) -> arg_t match
+      { IFT2AT(arg_it) -> {arg_ty, ret_ty}
+          annot-type-ok(s, arg_it, arg_ty)
+        , type-ok(s, ret_t, ret_ty)
+        , ty == FUNTY(arg_ty, ret_ty)
+      }
+  }.
+  
+annot-type-ok(s, annot_t, ty) :- annot_t match
+  { ST2AT(simple_t, annot_opt) -> simple_t match
+      { IntType() -> ty == INT()
+      | _ -> false // FIXME
+      }
+  }.
