@@ -44,6 +44,10 @@ lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-0.1.0-SNAPSHOT.spoofax-lan
 # ensure the java spoofax language frontend is compiled and available
 scalafront: lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-0.1.0-SNAPSHOT.spoofax-language sunshine
 
+scalafront-clean:
+	cd $(SCALA_FRONT) && $(MAVEN) clean
+
+
 ## Testing
 
 # Turn a scala file into its aterm representation
