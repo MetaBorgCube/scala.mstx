@@ -1,7 +1,9 @@
 import stdlib.lists
 import stdlib.sets
-import scala.type
+
+import scala.templates
 import scala.expr
+import scala.type
 
 // Scala allows overloaded defs, but not duplicate defs
 no-duplicate-defs(s, name, ty) :- {defs, matches}
@@ -19,6 +21,7 @@ def-ok(s, def) :- def match
             , fun-ok(s, sig, expr, rty)
           }
       }
+  | TMDF2DF(tmpldef) -> definition-ok(s, tmpldef)
   }.
 
 fun-ok(s, sig, expr, rty) :- sig match

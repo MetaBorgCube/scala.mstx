@@ -13,6 +13,10 @@ expr-ok(s, e, ty) :- e match
 literal-ok(s, l, ty) :- l match
   { IntLit(n) ->
       prelude-type(s, "Int", ty)
+  | BoolLit(b) -> b match
+      { True()  -> prelude-type(s, "Boolean", ty)
+      | False() -> prelude-type(s, "Boolean", ty)
+      }
   }.
 
 path-expr-ok(s, p, ty) :- {psteps}
@@ -36,9 +40,9 @@ path-steps-ty-ok(s, psteps, ty) :- psteps match
     , filter defs ((name, _) where name == id) matches
     , only(matches, p)
     , datum(p, d)
-    , d match { (_, ty0) -> ty == ty0 }
+    , d match { (_, ty0) -> compatible-ty(ty, ty0) }
   | id:ids -> {defs, matches, p, d}
-      query s `DEF as defs
+      query s `LEX* `OBJ as defs
     , filter defs ((name, _) where name == id) matches
     , only(matches, p)
     , datum(p, d)
