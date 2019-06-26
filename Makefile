@@ -58,11 +58,11 @@ scalafront-clean:
 	rm -f $(<:%.scala=%.sca)
 
 %.result: %.scala src/
-	@./tests/run $< | tee $@ | grep -i "failure\|success"
+	@./tests/run $< | tee $@ | grep -i "failure\|success\|panic"
 
 test: $(TEST_TARGETS)
 test-results: 
-	find . -name '*.result' -exec sh -c "cat {} | grep -i 'failure\|success'" \;
+	find . -name '*.result' -exec sh -c "cat {} | grep -i 'failure\|success\|panic'" \;
 
 ## Building
 

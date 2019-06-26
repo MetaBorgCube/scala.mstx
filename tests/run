@@ -21,13 +21,13 @@ fi
 readonly ATERM="java -jar $SUNSHINE parse -l $SCALADIR -p . -i"
 
 if true || test -t 1; then
-   SUCCESS="[\e[32mSUCCESS\e[0m]"
-   FAILURE="[\e[31mFAILURE\e[0m]"
-   STUCK="[\e[34mSTUCK\e[0m]"
+   SUCCESS="\e[32mSUCCESS\e[0m"
+   FAILURE="\e[31mFAILURE\e[0m"
+   PANIC="\e[34mPANIC\e[0m"
 else
-    SUCCESS="[SUCCESS]"
-    FAILURE="[FAILURE]"
-    STUCK="[STUCK]"
+    SUCCESS="SUCCESS"
+    FAILURE="FAILURE"
+    PANIC="PANIC"
 fi
 
 function agree {
@@ -55,7 +55,10 @@ do
     # compile the file to an aterm
     sca=${infile%.scala}.sca3
     cp "$infile" $sca
-    ${ATERM} $sca > ${infile%.scala}.aterm 2> /dev/null
+    ${ATERM} $sca > ${infile%.scala}.aterm 2> /dev/null || {
+        printf "[$PANIC:PARSING] $infile\n"
+        continue
+    }
 
     # run statix on the aterm
     statix check -I $DIR/../src/ scala ${infile%.scala}.aterm 2>&1 | tee ${infile%.scala}.stx.out
@@ -63,10 +66,10 @@ do
     
     # compute test result by comparison
     if [ $stx_ok -eq 65 ]; then
-        printf "$STUCK $infile"
+        printf "[$PANIC:STUCK] $infile\n"
     elif agree $stx_ok $scala_ok && agree $scala_ok $positive; then
-        printf "$SUCCESS $infile"
+        printf "[$SUCCESS] $infile\n"
     else
-        printf "$FAILURE $infile"
+        printf "[$FAILURE] $infile\n"
     fi
 done
