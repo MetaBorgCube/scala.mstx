@@ -30,3 +30,9 @@ prelude-type(s, id, ty) :- {types, matches, visible, p, d}
   , datum(p, d)
   , d match { (_, ty0) -> ty == ty0 }
   .
+
+// The type `ty` is either an object or class type, and has scope `s`
+is-scope-type(ty, s) :- ty match
+  { OBJECT(_, s0) -> s == s0
+  // | CLASS(_, s0) -> s == s0
+  | _ -> false }.

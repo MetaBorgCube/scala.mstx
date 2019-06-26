@@ -1,8 +1,12 @@
 import scala.type
+import stdlib.paths
+import stdlib.lists
 
 expr-ok(s, e, ty) :- e match
   { Lit(l) ->
       literal-ok(s, l, ty)
+  | PathExpr(p) ->
+      path-expr-ok(s, p, ty)
   | _ -> false // FIXME
   }.
 
@@ -10,3 +14,38 @@ literal-ok(s, l, ty) :- l match
   { IntLit(n) ->
       prelude-type(s, "Int", ty)
   }.
+
+path-expr-ok(s, p, ty) :- {psteps}
+    path-expr-with-path-steps(p, psteps)
+  , path-steps-ty-ok(s, psteps, ty).
+
+// path-expr-with-path-steps : Path * List(Id)
+path-expr-with-path-steps(p, psteps) :- p match
+  { SID2P(stable_id) -> stable_id match
+      { Id(id) -> psteps == id:[]
+      | Path(path, id) -> {psteps0}
+          path-expr-with-path-steps(path, psteps0)
+        , append(psteps0, id:[], psteps)
+      }
+  }.
+  
+path-steps-ty-ok(s, psteps, ty) :- psteps match
+  { [] -> false
+  | id:[] -> {defs, matches, p, d}
+      query s `DEF as defs
+    , filter defs ((name, _) where name == id) matches
+    , only(matches, p)
+    , datum(p, d)
+    , d match { (_, ty0) -> ty == ty0 }
+  | id:ids -> {defs, matches, p, d}
+      query s `DEF as defs
+    , filter defs ((name, _) where name == id) matches
+    , only(matches, p)
+    , datum(p, d)
+    , d match
+      { (_, ty0) -> {s0}
+          is-scope-type(ty0, s0)
+        , path-steps-ty-ok(s0, ids, ty)
+      }
+  }.
+    
