@@ -25,9 +25,13 @@ resolve-unqualified-def-ty(s, id, ty) :- {decl, d}
   , d match { (_, ty0) -> ty == ty0 }.
 
 resolve-unqualified-def-decl(s, id, decl) :- {defs, matches, visible, p}
-    query s `LEX* `DEF as defs
+    query s `LEX* (`IMPORT|`WILDCARD)* `DEF as defs
   , filter defs ((name, _) where name == id) matches
-  , min matches lexico(`DEF < `LEX) visible
+  , min matches lexico(`DEF < `LEX,
+                       `DEF < `LEX,
+                       `DEF < `IMPORT,
+                       `DEF < `WILDCARD,
+                       `IMPORT < `WILDCARD) visible
   , only(visible, p)
   , tgt(p, decl).
 

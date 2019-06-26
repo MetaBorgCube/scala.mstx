@@ -1,5 +1,5 @@
 import scala.def
-// import scala.iimport
+import scala.iimport
 
 stmts-ok(s_obj, stmts) :- stmts match
   { [] -> true
@@ -11,7 +11,7 @@ stmts-ok(s_obj, stmts) :- stmts match
 stmt-ok(s_obj, stmt) :- stmt match
   { DF2TM(annot, modif, def) ->
       def-ok(s_obj, def)
-  // | IM2TM(ImportExpr(stable_id, grp)) ->
-  //     iimports-stable-id(s_obj, stable_id, grp)
+  | IM2TM(ImportExpr(stable_id, grp)) ->
+      iimports-stable-id(s_obj, stable_id, grp)
   | _ -> false // FIXME
   }.
