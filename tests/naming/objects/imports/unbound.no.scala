@@ -1,3 +1,3 @@
 object A {
-  import B._
-}
+  import B._;
+};

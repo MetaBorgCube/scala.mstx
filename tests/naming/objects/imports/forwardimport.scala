@@ -1,8 +1,8 @@
 object A {
-  import B._
-  def g = f
-}
+  import B._;
+  def g = f;
+};
 
 object B {
-  def f = 42
-}
+  def f = 42;
+};

@@ -1,4 +1,4 @@
 object A {
-  def f: Int = g
-  def g: Int = f
-}
+  def f: Int = g;
+  def g: Int = f;
+};

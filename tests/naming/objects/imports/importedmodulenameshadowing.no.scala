@@ -1,9 +1,9 @@
 object A {
   object A {
-  }
-}
+  };
+};
 
 object C {
-  import A.A
-  import A._
-}
+  import A.A;
+  import A._;
+};

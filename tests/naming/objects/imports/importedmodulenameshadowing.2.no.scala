@@ -1,13 +1,13 @@
 object A {
-  object B {}
-}
+  object B {};
+};
 
 object C {
-  object B {}
-}
+  object B {};
+};
 
 object D {
-  import A.B
-  import C.B
-  import B._
-}
+  import A.B;
+  import C.B;
+  import B._;
+};

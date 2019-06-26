@@ -1,4 +1,4 @@
 object A {
   def f = g;
-  def g = 42
-}
+  def g = 42;
+};

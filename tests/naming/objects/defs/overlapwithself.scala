@@ -1,3 +1,3 @@
 object A {
-  def A: Int = 42
-}
+  def A: Int = 42;
+};

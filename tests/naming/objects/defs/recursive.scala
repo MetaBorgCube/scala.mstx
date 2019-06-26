@@ -1,3 +1,3 @@
 object A {
-  def f: Int = f
-}
+  def f: Int = f;
+};
