@@ -12,3 +12,9 @@ src(p,s) :- p match
 
 // d is the datum of the target of p
 datum(p,d) :- {s} tgt(p, s), s -> d.
+
+// l is the label of the target of p
+tgt-lbl(p,l) :- p match
+  { Edge(_, l', End(_)) -> l == l'
+  | Edge(_, _, p')      -> tgt-lbl(p', l)
+  }.

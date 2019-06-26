@@ -39,7 +39,7 @@ path-steps-unqualified-ty-ok(s, psteps, ty) :- psteps match
 path-steps-qualified-ty-ok(s, psteps, ty) :- psteps match
   { [] -> false
   | id:[] -> {ty0}
-      resolve-qualified-def(s, id, ty0)
+      resolve-qualified-def-ty(s, id, ty0)
     , compatible-ty(ty0, ty)
   | id:ids -> {s_obj}
       resolve-qualified-obj-scope(s, id, s_obj)

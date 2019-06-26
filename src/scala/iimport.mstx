@@ -14,11 +14,11 @@ iimports-path-steps-unqualified(s_obj, s, psteps, grp) :- psteps match
 
 iimports-path-steps-qualified(s_obj, s, psteps, grp) :- psteps match
   { [] -> grp match
-      { IId(id) -> {decl, s_iimport}
-          resolve-qualified-def-decl(s, id, decl)
+      { IId(id) -> {lbl, decl, s_iimport}
+          resolve-qualified-decl(s, id, lbl, decl)
         , new s_iimport
         , s_obj -[ `IMPORT ]-> s_iimport
-        , s_iimport -[ `DEF ]-> decl
+        , has-labeled-decl(s_iimport, lbl, decl)
       | IWild() -> {s_iimport}
           new s_iimport
         , s_obj -[ `WILDCARD ]-> s
@@ -28,3 +28,6 @@ iimports-path-steps-qualified(s_obj, s, psteps, grp) :- psteps match
     , iimports-path-steps-qualified(s_obj, s_step, ids, grp)
   }.
 
+has-labeled-decl(s, lbl, decl) :- lbl match
+  { `DEF -> s -[ `DEF ]-> decl
+  | `OBJ -> s -[ `OBJ ]-> decl }.
