@@ -16,7 +16,7 @@ compilation-unit-ok(s, cu) :- {s_prelude, s_cu}
 // Populate root scope with standard library classes, such as Int, Boolean, etc.
 prelude-ok(s) :-
     builtin-class(s, "Int")
-  , builtin-class(s, "Bool")
+  , builtin-class(s, "Boolean")
   .
 
 builtin-class(s, id) :- {class, s_class}
