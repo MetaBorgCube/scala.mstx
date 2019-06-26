@@ -6,7 +6,7 @@ expr-ok(s, e, ty) :- e match
   { Lit(l) ->
       literal-ok(s, l, ty)
   | PathExpr(SID2P(Id(id))) -> {ty0} // unqualified
-      resolve-unqualified-def(s, id, ty0)
+      resolve-unqualified-def-ty(s, id, ty0)
     , compatible-ty(ty0, ty)
   | PathExpr(p) -> // qualified
       path-expr-ok(s, p, ty)
@@ -29,7 +29,7 @@ path-expr-ok(s, p, ty) :- {psteps}
 path-steps-unqualified-ty-ok(s, psteps, ty) :- psteps match
   { [] -> false
   | id:[] -> {ty0}
-      resolve-unqualified-def(s, id, ty0)
+      resolve-unqualified-def-ty(s, id, ty0)
     , compatible-ty(ty0, ty)
   | id:ids -> {s_obj}
       resolve-unqualified-obj-scope(s, id, s_obj)

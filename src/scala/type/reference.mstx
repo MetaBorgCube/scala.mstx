@@ -19,15 +19,12 @@ resolve-unqualified-obj-scope(s, id, s_obj) :- {defs, matches, visible, p, d}
   , datum(p, d)
   , d match { (_, OBJECT(s0)) -> s_obj == s0 }.
 
-resolve-unqualified-def-ty(s, id, ty) :- {defs, matches, visible, p, d}
-    query s `LEX* `DEF as defs
-  , filter defs ((name, _) where name == id) matches
-  , min matches lexico(`DEF < `LEX) visible
-  , only(visible, p)
-  , datum(p, d)
+resolve-unqualified-def-ty(s, id, ty) :- {decl, d}
+    resolve-unqualified-def-decl(s, id, decl)
+  , decl -> d
   , d match { (_, ty0) -> ty == ty0 }.
 
-resolve-unqualified-def-decl(s, id, decl) :- {defs, matches, visible, p, d}
+resolve-unqualified-def-decl(s, id, decl) :- {defs, matches, visible, p}
     query s `LEX* `DEF as defs
   , filter defs ((name, _) where name == id) matches
   , min matches lexico(`DEF < `LEX) visible
@@ -48,3 +45,14 @@ resolve-qualified-def(s, id, ty) :- {defs, matches, p, d}
   , only(matches, p)
   , datum(p, d)
   , d match { (_, ty0) -> ty == ty0 }.
+
+resolve-qualified-def-ty(s, id, ty) :- {decl, d}
+    resolve-qualified-def-decl(s, id, decl)
+  , decl -> d
+  , d match { (_, ty0) -> ty == ty0 }.
+
+resolve-qualified-def-decl(s, id, decl) :- {defs, matches, p}
+    query s `DEF as defs
+  , filter defs ((name, _) where name == id) matches
+  , only(matches, p)
+  , tgt(p, decl).
