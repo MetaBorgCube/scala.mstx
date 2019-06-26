@@ -1,0 +1,30 @@
+import stdlib.paths
+import scala.type.reference
+
+iimports-stable-id(s, stable_id, grp) :- {psteps}
+    path-expr-with-path-steps(SID2P(stable_id), psteps)
+  , iimports-path-steps-unqualified(s, s, psteps, grp).
+
+iimports-path-steps-unqualified(s_obj, s, psteps, grp) :- psteps match
+  { [] -> false // Unreachable case
+  | id:ids -> {s_step}
+      resolve-unqualified-obj-scope(s, id, s_step)
+    , iimports-path-steps-qualified(s_obj, s_step, ids, grp)
+  }.
+
+iimports-path-steps-qualified(s_obj, s, psteps, grp) :- psteps match
+  { [] -> grp match
+      { IId(id) -> {decl, s_iimport}
+          resolve-qualified-def-decl(s, id, decl)
+        , new s_iimport
+        , s_obj -[ `IMPORT ]-> s_iimport
+        , s_iimport -[ `DEF ]-> decl
+      | IWild() -> {s_iimport}
+          new s_iimport
+        , s_obj -[ `WILDCARD ]-> s
+      }
+  | id:ids -> {s_step}
+      resolve-qualified-obj-scope(s, id, s_step)
+    , iimports-path-steps-qualified(s_obj, s_step, ids, grp)
+  }.
+
