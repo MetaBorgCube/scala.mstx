@@ -1,0 +1,11 @@
+import stdlib.lists
+
+// path-expr-with-path-steps : Path * List(Id)
+path-expr-with-path-steps(p, psteps) :- p match
+  { SID2P(stable_id) -> stable_id match
+      { Id(id) -> psteps == id:[]
+      | Path(path, id) -> {psteps0}
+          path-expr-with-path-steps(path, psteps0)
+        , append(psteps0, id:[], psteps)
+      }
+  }.

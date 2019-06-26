@@ -1,6 +1,6 @@
 import scala.type
 import stdlib.paths
-import stdlib.lists
+import scala.type.reference
 
 expr-ok(s, e, ty) :- e match
   { Lit(l) ->
@@ -23,28 +23,20 @@ path-expr-ok(s, p, ty) :- {psteps}
     path-expr-with-path-steps(p, psteps)
   , path-steps-ty-ok(s, psteps, ty).
 
-// path-expr-with-path-steps : Path * List(Id)
-path-expr-with-path-steps(p, psteps) :- p match
-  { SID2P(stable_id) -> stable_id match
-      { Id(id) -> psteps == id:[]
-      | Path(path, id) -> {psteps0}
-          path-expr-with-path-steps(path, psteps0)
-        , append(psteps0, id:[], psteps)
-      }
-  }.
-  
 path-steps-ty-ok(s, psteps, ty) :- psteps match
   { [] -> false
-  | id:[] -> {defs, matches, p, d}
-      query s `DEF as defs
+  | id:[] -> {defs, matches, visible, p, d}
+      query s `LEX* `DEF as defs
     , filter defs ((name, _) where name == id) matches
-    , only(matches, p)
+    , min matches lexico(`OBJ < `LEX) visible
+    , only(visible, p)
     , datum(p, d)
     , d match { (_, ty0) -> compatible-ty(ty, ty0) }
-  | id:ids -> {defs, matches, p, d}
+  | id:ids -> {defs, matches, visible, p, d}
       query s `LEX* `OBJ as defs
     , filter defs ((name, _) where name == id) matches
-    , only(matches, p)
+    , min matches lexico(`OBJ < `LEX) visible
+    , only(visible, p)
     , datum(p, d)
     , d match
       { (_, ty0) -> {s0}
