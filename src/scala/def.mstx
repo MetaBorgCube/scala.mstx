@@ -3,10 +3,11 @@ import stdlib.sets
 import scala.type
 import scala.expr
 
+// Scala allows overloaded defs, but not duplicate defs
 no-duplicate-defs(s, name, ty) :- {defs, matches}
     query s `DEF as defs
-  , filter defs ((name', ty') where name' == name, ty' != ty) matches
-  , empty(matches).
+  , filter defs ((name', ty') where name' == name, ty' == ty) matches
+  , singleton(matches).
 
 def-ok(s, def) :- def match
   { FD2DF(fs) -> fs match
