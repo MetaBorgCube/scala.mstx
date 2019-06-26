@@ -5,7 +5,10 @@ import scala.type.reference
 expr-ok(s, e, ty) :- e match
   { Lit(l) ->
       literal-ok(s, l, ty)
-  | PathExpr(p) ->
+  | PathExpr(SID2P(Id(id))) -> {ty0} // unqualified
+      resolve-unqualified-def(s, id, ty0)
+    , compatible-ty(ty0, ty)
+  | PathExpr(p) -> // qualified
       path-expr-ok(s, p, ty)
   | _ -> false // FIXME
   }.
@@ -21,19 +24,25 @@ literal-ok(s, l, ty) :- l match
 
 path-expr-ok(s, p, ty) :- {psteps}
     path-expr-with-path-steps(p, psteps)
-  , path-steps-ty-ok(s, psteps, ty).
+  , path-steps-unqualified-ty-ok(s, psteps, ty).
 
-path-steps-ty-ok(s, psteps, ty) :- psteps match
+path-steps-unqualified-ty-ok(s, psteps, ty) :- psteps match
   { [] -> false
-  | id:[] -> {defs, matches, visible, p, d}
-      query s `LEX* `DEF as defs
-    , filter defs ((name, _) where name == id) matches
-    , min matches lexico(`OBJ < `LEX) visible
-    , only(visible, p)
-    , datum(p, d)
-    , d match { (_, ty0) -> compatible-ty(ty, ty0) }
+  | id:[] -> {ty0}
+      resolve-unqualified-def(s, id, ty0)
+    , compatible-ty(ty0, ty)
   | id:ids -> {s_obj}
-      resolve-obj-scope(s, id, s_obj)
-    , path-steps-ty-ok(s_obj, ids, ty)
+      resolve-unqualified-obj-scope(s, id, s_obj)
+    , path-steps-qualified-ty-ok(s_obj, ids, ty)
   }.
-    
+
+path-steps-qualified-ty-ok(s, psteps, ty) :- psteps match
+  { [] -> false
+  | id:[] -> {ty0}
+      resolve-qualified-def(s, id, ty0)
+    , compatible-ty(ty0, ty)
+  | id:ids -> {s_obj}
+      resolve-qualified-obj-scope(s, id, s_obj)
+    , path-steps-qualified-ty-ok(s_obj, ids, ty)
+  }.
+

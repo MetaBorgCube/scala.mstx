@@ -11,10 +11,32 @@ path-expr-with-path-steps(p, psteps) :- p match
       }
   }.
 
-resolve-obj-scope(s, id, s_obj) :- {defs, matches, visible, p, d}
+resolve-unqualified-obj-scope(s, id, s_obj) :- {defs, matches, visible, p, d}
     query s `LEX* `OBJ as defs
   , filter defs ((name, _) where name == id) matches
   , min matches lexico(`OBJ < `LEX) visible
   , only(visible, p)
   , datum(p, d)
   , d match { (_, OBJECT(s0)) -> s_obj == s0 }.
+
+resolve-unqualified-def(s, id, ty) :- {defs, matches, visible, p, d}
+    query s `LEX* `DEF as defs
+  , filter defs ((name, _) where name == id) matches
+  , min matches lexico(`DEF < `LEX) visible
+  , only(visible, p)
+  , datum(p, d)
+  , d match { (_, ty0) -> ty == ty0 }.
+
+resolve-qualified-obj-scope(s, id, s_obj) :- {defs, matches, p, d}
+    query s `OBJ as defs
+  , filter defs ((name, _) where name == id) matches
+  , only(matches, p)
+  , datum(p, d)
+  , d match { (_, OBJECT(s0)) -> s_obj == s0 }.
+
+resolve-qualified-def(s, id, ty) :- {defs, matches, p, d}
+    query s `DEF as defs
+  , filter defs ((name, _) where name == id) matches
+  , only(matches, p)
+  , datum(p, d)
+  , d match { (_, ty0) -> ty == ty0 }.

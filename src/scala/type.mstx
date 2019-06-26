@@ -37,10 +37,9 @@ is-scope-type(ty, s) :- ty match
   // | CLASS(_, s0) -> s == s0
   | _ -> false }.
 
-// A type `ty` is compatible with any 0-argument method that returns `ty`
-compatible-ty(ty0, ty1) :- {ty_unpack}
-    unpack-0ary-meth(ty0, ty_unpack)
-  , unpack-0ary-meth(ty1, ty_unpack).
+// A type `ty0` is compatible with any 0-argument method that returns `ty`
+compatible-ty(ty0, ty) :- {ty_unpack}
+    unpack-0ary-meth(ty0, ty).
 
 unpack-0ary-meth(ty0, ty1) :- ty0 match
   { METH([], ty00) -> unpack-0ary-meth(ty00, ty1)
