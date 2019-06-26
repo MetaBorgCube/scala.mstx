@@ -1,3 +1,4 @@
+import stdlib.paths
 import stdlib.lists
 
 // path-expr-with-path-steps : Path * List(Id)
@@ -9,3 +10,11 @@ path-expr-with-path-steps(p, psteps) :- p match
         , append(psteps0, id:[], psteps)
       }
   }.
+
+resolve-obj-scope(s, id, s_obj) :- {defs, matches, visible, p, d}
+    query s `LEX* `OBJ as defs
+  , filter defs ((name, _) where name == id) matches
+  , min matches lexico(`OBJ < `LEX) visible
+  , only(visible, p)
+  , datum(p, d)
+  , d match { (_, OBJECT(s0)) -> s_obj == s0 }.

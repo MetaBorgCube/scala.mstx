@@ -32,16 +32,8 @@ path-steps-ty-ok(s, psteps, ty) :- psteps match
     , only(visible, p)
     , datum(p, d)
     , d match { (_, ty0) -> compatible-ty(ty, ty0) }
-  | id:ids -> {defs, matches, visible, p, d}
-      query s `LEX* `OBJ as defs
-    , filter defs ((name, _) where name == id) matches
-    , min matches lexico(`OBJ < `LEX) visible
-    , only(visible, p)
-    , datum(p, d)
-    , d match
-      { (_, ty0) -> {s0}
-          is-scope-type(ty0, s0)
-        , path-steps-ty-ok(s0, ids, ty)
-      }
+  | id:ids -> {s_obj}
+      resolve-obj-scope(s, id, s_obj)
+    , path-steps-ty-ok(s_obj, ids, ty)
   }.
     
