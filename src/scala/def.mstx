@@ -5,7 +5,7 @@ import scala.expr
 
 no-duplicate-defs(s, name, ty) :- {defs, matches}
     query s `DEF as defs
-  , filter defs ((name', ty') where name' == name, ty' == ty) matches
+  , filter defs ((name', ty') where name' == name, ty' != ty) matches
   , empty(matches).
 
 def-ok(s, def) :- def match
@@ -63,4 +63,3 @@ params-ok(s, params, tys) :- params match
   }.
 
 
-      
