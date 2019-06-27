@@ -22,38 +22,46 @@ resolve-unqualified-def-ty(s, id, ty) :- {decl, d}
   , d match { (_, ty0) -> ty == ty0 }.
 
 resolve-unqualified-decl(s, id, lbl, decl) :- {defs, matches, visible, p}
-    query s `LEX* (`IMPORT|`WILDCARD)? (`DEF|`OBJ) as defs
+    query s ((`LEX | `BWD)* (`IMPORT|`WILDCARD)? `FWD*) (`DEF|`OBJ) as defs
   , filter defs ((name, _) where name == id) matches
   , min matches lexico(`DEF < `LEX,
                        `DEF < `IMPORT,
                        `DEF < `WILDCARD,
+                       `DEF < `FWD,
+                       `DEF < `BWD,
                        `IMPORT < `WILDCARD) visible
   , only(visible, p)
   , tgt(p, decl)
   , tgt-lbl(p, lbl).
 
 resolve-unqualified-def-decl(s, id, decl) :- {defs, matches, visible, p}
-    query s `LEX* (`IMPORT|`WILDCARD)? `DEF as defs
+    query s (`BWD* `LEX* `BWD* (`IMPORT|`WILDCARD)? `FWD*) `DEF as defs
   , filter defs ((name, _) where name == id) matches
   , min matches lexico(`DEF < `LEX,
                        `DEF < `IMPORT,
                        `DEF < `WILDCARD,
+                       `DEF < `FWD,
+                       `DEF < `BWD,
                        `IMPORT < `WILDCARD) visible
   , only(visible, p)
   , tgt(p, decl).
 
 
 resolve-qualified-obj-scope(s, id, s_obj) :- {defs, matches, visible, p, d}
-    query s `OBJ as defs
+    query s (`BWD | `FWD)* `OBJ as defs
   , filter defs ((name, _) where name == id) matches
-  , only(matches, p)
+  , min matches lexico(`DEF < `FWD,
+                       `DEF < `BWD) visible
+  , only(visible, p)
   , datum(p, d)
   , d match { (_, OBJECT(s0)) -> s_obj == s0 }.
 
 resolve-qualified-decl(s, id, lbl, decl) :- {defs, matches, visible, p}
-    query s (`DEF|`OBJ) as defs
+    query s (`BWD | `FWD)* (`DEF|`OBJ) as defs
   , filter defs ((name, _) where name == id) matches
-  , only(matches, p)
+  , min matches lexico(`DEF < `FWD,
+                       `DEF < `BWD) visible
+  , only(visible, p)
   , tgt(p, decl)
   , tgt-lbl(p, lbl).
 
