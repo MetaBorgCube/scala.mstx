@@ -14,9 +14,9 @@ no-duplicate-defs(s, name, ty) :- {defs, matches}
 def-ok(s, def) :- def match
   { FD2DF(fs) -> fs match
       { FunSig(sig, rt, expr) -> rt match
-          { NoTypeAnnot() -> {rty}
+          { None() -> {rty}
               fun-ok(s, sig, expr, rty)
-          | TA(t) -> {rty}
+          | Some(t) -> {rty}
               type-ok(s, t, rty)
             , fun-ok(s, sig, expr, rty)
           }
@@ -26,9 +26,8 @@ def-ok(s, def) :- def match
 
 fun-ok(s, sig, expr, rty) :- sig match
   { FS(fname, ftpclause, pclauses) -> ftpclause match
-      { NoFunTypeParamClause() ->
-          pclauses-ok(s, s, fname, pclauses, [], expr, rty)
-      | _ -> false // FIXME
+      { None() -> pclauses-ok(s, s, fname, pclauses, [], expr, rty)
+      | _      -> false // FIXME
       }
   }.
 
@@ -50,13 +49,11 @@ pclauses-ok(s, s_f, fname, pclauses, param_tys, expr, rty) :- pclauses match
   }.
 
 params-ok(s, params, tys) :- params match
-  { [] ->
-      tys == []
+  { []           -> tys == []
   | param:params -> param match
       { Param(id, t_opt) -> t_opt match
-          { NoParamTypeAnnot() ->
-              false //
-          | PTA2P(t) -> {ty, tys_tail, s_param}
+          { None()  -> false // FIXME?
+          | Some(t) -> {ty, tys_tail, s_param}
               type-ok(s, t, ty)
             , new s_param -> (id, ty)
             , s -[ `VAR ]-> s_param
@@ -65,5 +62,4 @@ params-ok(s, params, tys) :- params match
           }
       }
   }.
-
 
