@@ -50,8 +50,7 @@ pclauses-ok(s_f, s_obj, fname, pclauses, param_tys, expr, rty) :- pclauses match
   }.
 
 params-ok(s, params, tys) :- params match
-  { [] ->
-      tys == []
+  { []           -> tys == []
   | param:params -> param match
       { Param(id, t_opt) -> t_opt match
           { None() ->
@@ -65,5 +64,4 @@ params-ok(s, params, tys) :- params match
           }
       }
   }.
-
 
