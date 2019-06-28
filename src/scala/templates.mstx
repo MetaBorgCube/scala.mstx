@@ -8,21 +8,23 @@ no-duplicate-values(s, name, ty) :- {defs, matches}
   , empty(matches).
 
 definition-ok(s, def) :- def match
-  { ObjectDef(name, ext_clause, body) -> {s_obj, self}
+  { ObjectDef(name, ext_clause, body) -> {s_obj, s_imp, self}
       self == OBJECT(s_obj)
     , new s_obj -> (name, self)
     , s_obj -[ `LEX ]-> s
     , s -[ `OBJ ]-> s_obj
+    , new s_imp
+    , s_imp -[ `EPS ]-> s_obj
     , extends-clause-ok(s, s_obj, ext_clause)
-    , template-body-ok(s_obj, body)
+    , template-body-ok(s_imp, s_obj, body)
     , no-duplicate-values(s, name, self)
   }.
 
 extends-clause-ok(s, s_obj, ext_clause) :- ext_clause match
-  { NoExtends() -> true
-  | _           -> false // FIXME
+  { None() -> true
+  | _      -> false // FIXME
   }.
 
-template-body-ok(s_obj, body) :- body match
-  { TemplateBody(self_type, stmts) -> stmts-ok(s_obj, stmts) // FIXME
+template-body-ok(s_imp, s_obj, body) :- body match
+  { TemplateBody(self_type, stmts) -> stmts-ok(s_imp, s_obj, stmts) // FIXME
   }.

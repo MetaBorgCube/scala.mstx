@@ -13,9 +13,9 @@ type-ok(s, t, ty) :- t match
   
 annot-type-ok(s, annot_t, ty) :- annot_t match
   { ST2AT(Id(id), annot_opt) -> {types, matches, visible, p, d}
-      query s (`LEX* `PRELUDE? `TYPE) as types
+      query s ((`LEX | `EPS)* `PRELUDE? `TYPE) as types
     , filter types ((name, _) where name == id) matches
-    , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX) visible
+    , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX, `TYPE < `LEX) visible
     , only(visible, p)
     , datum(p, d)
     , d match { (_, ty0) -> ty == ty0 }
@@ -23,9 +23,9 @@ annot-type-ok(s, annot_t, ty) :- annot_t match
 
 // Resolve a type in the prelude
 prelude-type(s, id, ty) :- {types, matches, visible, p, d}
-    query s (`LEX* `PRELUDE `TYPE) as types
+    query s ((`LEX | `EPS)* `PRELUDE `TYPE) as types
   , filter types ((name, _) where name == id) matches
-  , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX) visible
+  , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX, `TYPE < `LEX) visible
   , only(visible, p)
   , datum(p, d)
   , d match { (_, ty0) -> ty == ty0 }

@@ -11,41 +11,41 @@ no-duplicate-defs(s, name, ty) :- {defs, matches}
   , filter defs ((name', ty') where name' == name, ty' == ty) matches
   , singleton(matches).
 
-def-ok(s, def) :- def match
+def-ok(s_imp, s_obj, def) :- def match
   { FD2DF(fs) -> fs match
       { FunSig(sig, rt, expr) -> rt match
-          { NoTypeAnnot() -> {rty}
-              fun-ok(s, sig, expr, rty)
-          | TA(t) -> {rty}
-              type-ok(s, t, rty)
-            , fun-ok(s, sig, expr, rty)
+          { None() -> {rty}
+              fun-ok(s_imp, s_obj, sig, expr, rty)
+          | Some(t) -> {rty}
+              type-ok(s_imp, t, rty)
+            , fun-ok(s_imp, s_obj, sig, expr, rty)
           }
       }
-  | TMDF2DF(tmpldef) -> definition-ok(s, tmpldef)
+  | TMDF2DF(tmpldef) -> definition-ok(s_imp, tmpldef)
   }.
 
-fun-ok(s, sig, expr, rty) :- sig match
+fun-ok(s_imp, s_obj, sig, expr, rty) :- sig match
   { FS(fname, ftpclause, pclauses) -> ftpclause match
-      { NoFunTypeParamClause() ->
-          pclauses-ok(s, s, fname, pclauses, [], expr, rty)
+      { None() ->
+          pclauses-ok(s_imp, s_obj, fname, pclauses, [], expr, rty)
       | _ -> false // FIXME
       }
   }.
 
-pclauses-ok(s, s_f, fname, pclauses, param_tys, expr, rty) :- pclauses match
+pclauses-ok(s_f, s_obj, fname, pclauses, param_tys, expr, rty) :- pclauses match
   { [] -> {t, s_def, def_ty}
       expr-ok(s_f, expr, rty)
     , def_ty == METH(param_tys, rty)
-    , no-duplicate-defs(s, fname, def_ty)
+    , no-duplicate-defs(s_obj, fname, def_ty)
     , new s_def -> (fname, def_ty)
-    , s -[ `DEF ]-> s_def
+    , s_obj -[ `DEF ]-> s_def
   | pclause:pclauses -> pclause match
       { ParamClause(params) -> {s_f_inner, tys, param_tys1}
           new s_f_inner
         , s_f_inner -[ `LEX ]-> s_f
         , params-ok(s_f_inner, params, tys)
         , append(param_tys, tys:[], param_tys1)
-        , pclauses-ok(s, s_f_inner, fname, pclauses, param_tys1, expr, rty)
+        , pclauses-ok(s_f_inner, s_obj, fname, pclauses, param_tys1, expr, rty)
       }
   }.
 
@@ -54,7 +54,7 @@ params-ok(s, params, tys) :- params match
       tys == []
   | param:params -> param match
       { Param(id, t_opt) -> t_opt match
-          { NoParamTypeAnnot() ->
+          { None() ->
               false //
           | PTA2P(t) -> {ty, tys_tail, s_param}
               type-ok(s, t, ty)

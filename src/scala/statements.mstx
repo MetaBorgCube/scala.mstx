@@ -1,18 +1,17 @@
 import scala.def
 import scala.iimport
 
-stmts-ok(s_obj, stmts) :- stmts match
+stmts-ok(s_imp, s_obj, stmts) :- stmts match
   { [] -> true
   | stmt:stmts -> stmt match
       { DF2TM(annot, modif, def) ->
-          def-ok(s_obj, def)
-        , stmts-ok(s_obj, stmts)
-      | IM2TM(ImportExpr(stable_id, grp)) -> {s_imp}
-          new s_imp
-        , s_imp -[ `BWD ]-> s_obj
-        , s_obj -[ `FWD ]-> s_imp
-        , iimports-stable-id(s_obj, s_imp, stable_id, grp)
-        , stmts-ok(s_imp, stmts)
+          def-ok(s_imp, s_obj, def)
+        , stmts-ok(s_imp, s_obj, stmts)
+      | IM2TM(ImportExpr(stable_id, grp)) -> {s_imp_nu}
+          new s_imp_nu
+        , s_imp_nu -[ `EPS ]-> s_imp
+        , iimports-stable-id(s_imp_nu, s_imp, stable_id, grp)
+        , stmts-ok(s_imp_nu, s_obj, stmts)
       | _ -> false // FIXME
       }
   }.
