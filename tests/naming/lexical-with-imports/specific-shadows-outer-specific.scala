@@ -7,7 +7,7 @@ object O {
   };
 
   import N.A;
-  {
+  object I {
     import M.A;
     val x : A = 3;
   };
