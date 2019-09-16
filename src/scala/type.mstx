@@ -10,7 +10,7 @@ type-decl(s_mod, s, name, ty) :- {s_ty, typ}
   new s_ty -> (name, typ)
 
   , s_mod -[ `TYPE ]-> s_ty
-  , no-duplicate-types(s_mod, ty, typ)
+  , no-duplicate-types(s_mod, name, typ)
 
   , type-ok(s, ty, typ).
 

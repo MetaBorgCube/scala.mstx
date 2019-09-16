@@ -2,12 +2,12 @@ import stdlib.paths
 import stdlib.lists
 
 // Resolve a name locally in a given scope to a set of declarations in that scope
-local-decls(s, decls) :- {ps}
+local-decls(s, ps) :-
   query s (`VAL|`TYPE) as ps.
 
 resolve-local-decl(s, name, decls) :- {ps}
   local-decls(s, ps)
-  , filter ps ((name', _) where name == name') decls.
+  , filter ps ((name', _) where name' == name) decls.
 
 resolve-object(s, id, s_obj) :- {vs, matches, ps, p}
   query s `B*(`P`B*)*(`W|`I)?`VAL as vs
