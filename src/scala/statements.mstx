@@ -10,7 +10,7 @@ stmts-ok(s_mod, s, stmts) :- stmts match
       | IM2TM(imp) -> {s'}
           new s'
         , s' -[ `B ]-> s
-        , iimport-ok(s', imp)
+        , iimport-ok(s', s, imp)
         , stmts-ok(s_mod, s', stmts)
       }
   }.
