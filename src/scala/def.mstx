@@ -17,7 +17,6 @@ def-ok(s_mod, s, def) :- def match
   | TMDF2DF(tmpldef) -> definition-ok(s_mod, s, tmpldef)
   }.
 
-// TypeDef(Id("A"), IF2TY(ST2AT(Id("Int"), None())))
 type-definition-ok(s_mod, s, tydef) :- tydef match
   { TypeDef(name, decl) -> type-decl(s_mod, s, name, decl)
   }.

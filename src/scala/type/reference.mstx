@@ -10,7 +10,7 @@ resolve-local-decl(s, name, decls) :- {ps}
   , filter ps ((name', _) where name == name') decls.
 
 resolve-object(s, id, s_obj) :- {vs, matches, ps, p}
-  query s `B*`P*(eps|`W|`I)`VAL as vs
+  query s `B*(`P`B*)*(`W|`I)?`VAL as vs
   , filter vs ((name, _) where name == id) matches
   , min matches scala ps
   , only(ps, p)

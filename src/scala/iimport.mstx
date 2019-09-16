@@ -8,6 +8,8 @@ iimport-ok(s, s', i) :- i match
       iimports-stable-id(s, s', stable_id, grp)
   }.
 
+// s is where we will create the import edge
+// s' is where we are resolving into
 iimports-stable-id(s, s', stable_id, grp) :- {psteps}
     path-to-list(stable_id, psteps)
   , psteps match { id:ids -> // paths have length at least one
@@ -16,6 +18,7 @@ iimports-stable-id(s, s', stable_id, grp) :- {psteps}
       , iimports-path-steps(s, s_obj, ids, grp)
     }.
 
+// TODO BUG this gets stuck if s == s_obj
 iimports-path-steps(s, s_obj, psteps, grp) :- psteps match
   { [] -> grp match
       { IId(id) -> {lbl, s_iimport, decls}
