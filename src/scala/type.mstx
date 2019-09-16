@@ -1,5 +1,11 @@
 import stdlib.paths
 
+type-decl(s_mod, s, name, ty) :- {s_ty, ty, typ, self}
+  new s_ty -> (name, self),
+  s_mod -[ `TYPE ]-> s_ty,
+  type-ok(s, ty, typ),
+  self == typ.
+
 type-ok(s, t, ty) :- t match
   { FunTy(arg_t, ret_t) -> arg_t match
       { IFT2FAT(arg_it) -> {arg_ty, ret_ty}
@@ -10,26 +16,22 @@ type-ok(s, t, ty) :- t match
   | IF2TY(t) ->
       annot-type-ok(s, t, ty)
   }.
+
+predef-type-ok(s, tyname, ty) :- {tys, ps, p, n}
+  query s `B*`P*`PREDEF`TYPE as tys
+  , filter tys ((name, _) where name == tyname) ps
+  , only(ps, p)
+  , datum(p, (n, ty)).
   
 annot-type-ok(s, annot_t, ty) :- annot_t match
   { ST2AT(Id(id), annot_opt) -> {types, matches, visible, p, d}
-      query s ((`LEX | `EPS)* `PRELUDE? `TYPE) as types
+      query s (`B*`P*(`I|`W)?`TYPE) as types
     , filter types ((name, _) where name == id) matches
-    , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX, `TYPE < `LEX) visible
+    , min matches scala visible
     , only(visible, p)
     , datum(p, d)
     , d match { (_, ty0) -> ty == ty0 }
   }.
-
-// Resolve a type in the prelude
-prelude-type(s, id, ty) :- {types, matches, visible, p, d}
-    query s ((`LEX | `EPS)* `PRELUDE `TYPE) as types
-  , filter types ((name, _) where name == id) matches
-  , min matches lexico(`TYPE < `PRELUDE, `PRELUDE < `LEX, `TYPE < `LEX) visible
-  , only(visible, p)
-  , datum(p, d)
-  , d match { (_, ty0) -> ty == ty0 }
-  .
 
 // The type `ty` is either an object or class type, and has scope `s`
 is-scope-type(ty, s) :- ty match

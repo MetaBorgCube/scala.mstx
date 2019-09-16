@@ -11,57 +11,65 @@ no-duplicate-defs(s, name, ty) :- {defs, matches}
   , filter defs ((name', ty') where name' == name, ty' == ty) matches
   , singleton(matches).
 
-def-ok(s_imp, s_obj, def) :- def match
-  { FD2DF(fs) -> fs match
-      { FunSig(sig, rt, expr) -> rt match
-          { None() -> {rty}
-              fun-ok(s_imp, s_obj, sig, expr, rty)
-          | Some(t) -> {rty}
-              type-ok(s_imp, t, rty)
-            , fun-ok(s_imp, s_obj, sig, expr, rty)
-          }
-      }
-  | TMDF2DF(tmpldef) -> definition-ok(s_imp, tmpldef)
+def-ok(s_mod, s, def) :- def match
+  { FD2DF(fs) -> function-definition-ok(s_mod, s, fs)
+  | TD2DF(typedef)   -> type-definition-ok(s_mod, s, typedef)
+  | TMDF2DF(tmpldef) -> definition-ok(s_mod, s, tmpldef)
   }.
 
-fun-ok(s_imp, s_obj, sig, expr, rty) :- sig match
-  { FS(fname, ftpclause, pclauses) -> ftpclause match
-      { None() ->
-          pclauses-ok(s_imp, s_obj, fname, pclauses, [], expr, rty)
-      | _ -> false // FIXME
-      }
+// TypeDef(Id("A"), IF2TY(ST2AT(Id("Int"), None())))
+type-definition-ok(s_mod, s, tydef) :- tydef match
+  { TypeDef(name, decl) -> type-decl(s_mod, s, name, decl)
   }.
 
-pclauses-ok(s_f, s_obj, fname, pclauses, param_tys, expr, rty) :- pclauses match
-  { [] -> {t, s_def, def_ty}
-      expr-ok(s_f, expr, rty)
-    , def_ty == METH(param_tys, rty)
-    , no-duplicate-defs(s_obj, fname, def_ty)
-    , new s_def -> (fname, def_ty)
-    , s_obj -[ `DEF ]-> s_def
-  | pclause:pclauses -> pclause match
-      { ParamClause(params) -> {s_f_inner, tys, param_tys1}
-          new s_f_inner
-        , s_f_inner -[ `LEX ]-> s_f
-        , params-ok(s_f_inner, params, tys)
-        , append(param_tys, tys:[], param_tys1)
-        , pclauses-ok(s_f_inner, s_obj, fname, pclauses, param_tys1, expr, rty)
+function-definition-ok(s_mod, s, fs) :- fs match
+  { FunSig(sig, rt, expr) -> rt match
+      { None() -> {rty}
+          false // FIXME fun-ok(s, sig, expr, rty)
+      | Some(t) -> {rty}
+          type-ok(s, t, rty)
+        , false // FIXME fun-ok(s, sig, expr, rty)
       }
   }.
 
-params-ok(s, params, tys) :- params match
-  { []           -> tys == []
-  | param:params -> param match
-      { Param(id, t_opt) -> t_opt match
-          { None() ->
-              false //
-          | PTA2P(t) -> {ty, tys_tail, s_param}
-              type-ok(s, t, ty)
-            , new s_param -> (id, ty)
-            , s -[ `VAR ]-> s_param
-            , params-ok(s, params, tys_tail)
-            , tys == ty:tys_tail
-          }
-      }
-  }.
+// fun-ok(s, sig, expr, rty) :- sig match
+//   { FS(fname, ftpclause, pclauses) -> ftpclause match
+//       { None() ->
+//           pclauses-ok(s_imp, s_obj, fname, pclauses, [], expr, rty)
+//       | _ -> false // FIXME
+//       }
+//   }.
+
+// pclauses-ok(s_f, s_obj, fname, pclauses, param_tys, expr, rty) :- pclauses match
+//   { [] -> {t, s_def, def_ty}
+//       expr-ok(s_f, expr, rty)
+//     , def_ty == METH(param_tys, rty)
+//     , no-duplicate-defs(s_obj, fname, def_ty)
+//     , new s_def -> (fname, def_ty)
+//     , s_obj -[ `DEF ]-> s_def
+//   | pclause:pclauses -> pclause match
+//       { ParamClause(params) -> {s_f_inner, tys, param_tys1}
+//           new s_f_inner
+//         , s_f_inner -[ `LEX ]-> s_f
+//         , params-ok(s_f_inner, params, tys)
+//         , append(param_tys, tys:[], param_tys1)
+//         , pclauses-ok(s_f_inner, s_obj, fname, pclauses, param_tys1, expr, rty)
+//       }
+//   }.
+
+// params-ok(s, params, tys) :- params match
+//   { []           -> tys == []
+//   | param:params -> param match
+//       { Param(id, t_opt) -> t_opt match
+//           { None() ->
+//               false //
+//           | PTA2P(t) -> {ty, tys_tail, s_param}
+//               type-ok(s, t, ty)
+//             , new s_param -> (id, ty)
+//             , s -[ `VAR ]-> s_param
+//             , params-ok(s, params, tys_tail)
+//             , tys == ty:tys_tail
+//           }
+//       }
+//   }.
 

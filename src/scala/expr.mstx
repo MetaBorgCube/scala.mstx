@@ -1,48 +1,31 @@
 import scala.type
 import stdlib.paths
 import scala.type.reference
+import scala.paths
 
 expr-ok(s, e, ty) :- e match
   { Lit(l) ->
       literal-ok(s, l, ty)
-  | PathExpr(SID2P(Id(id))) -> {ty0} // unqualified
-      resolve-unqualified-def-ty(s, id, ty0)
-    , compatible-ty(ty0, ty)
-  | PathExpr(p) -> // qualified
+  | PathExpr(SID2P(p)) -> // unqualified
+      path-expr-ok(s, p, ty)
+  | PathExpr(StableId(p)) -> // qualified
       path-expr-ok(s, p, ty)
   | _ -> false // FIXME
   }.
 
 literal-ok(s, l, ty) :- l match
-  { IntLit(n) ->
-      prelude-type(s, "Int", ty)
+  { IntLit(n) -> predef-type-ok(s, "Int", ty)
   | BoolLit(b) -> b match
-      { True()  -> prelude-type(s, "Boolean", ty)
-      | False() -> prelude-type(s, "Boolean", ty)
+      { True()  -> predef-type-ok(s, "Boolean", ty)
+      | False() -> predef-type-ok(s, "Boolean", ty)
       }
   }.
 
-path-expr-ok(s, p, ty) :- {psteps}
-    path-expr-with-path-steps(p, psteps)
-  , path-steps-unqualified-ty-ok(s, psteps, ty).
-
-path-steps-unqualified-ty-ok(s, psteps, ty) :- psteps match
-  { [] -> false
-  | id:[] -> {ty0}
-      resolve-unqualified-def-ty(s, id, ty0)
-    , compatible-ty(ty0, ty)
-  | id:ids -> {s_obj}
-      resolve-unqualified-obj-scope(s, id, s_obj)
-    , path-steps-qualified-ty-ok(s_obj, ids, ty)
+path-expr-ok(s, p, ty) :- p match
+  { Path(p', id) -> {s_obj, ps, p, n, ty'}
+      resolve-path(s, p, OBJECT(n, s_obj))
+      , resolve-local-decl(s_obj, id, ps)
+      , only(ps, p)
+      , last(p, `VAL, ty')
+      , compatible-ty(ty, ty')
   }.
-
-path-steps-qualified-ty-ok(s, psteps, ty) :- psteps match
-  { [] -> false
-  | id:[] -> {ty0}
-      resolve-qualified-def-ty(s, id, ty0)
-    , compatible-ty(ty0, ty)
-  | id:ids -> {s_obj}
-      resolve-qualified-obj-scope(s, id, s_obj)
-    , path-steps-qualified-ty-ok(s_obj, ids, ty)
-  }.
-

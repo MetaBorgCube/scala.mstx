@@ -1,32 +1,43 @@
 import stdlib.paths
+
 import scala.type.reference
+import scala.paths
 
-iimports-stable-id(s_imp_nu, s_imp, stable_id, grp) :- {psteps}
-    path-expr-with-path-steps(SID2P(stable_id), psteps)
-  , iimports-path-steps-unqualified(s_imp_nu, s_imp, psteps, grp).
-
-iimports-path-steps-unqualified(s_imp_nu, s_imp, psteps, grp) :- psteps match
-  { [] -> false // Unreachable case
-  | id:ids -> {s_step}
-      resolve-unqualified-obj-scope(s_imp, id, s_step)
-    , iimports-path-steps-qualified(s_imp_nu, s_step, ids, grp)
+iimport-ok(s, i) :- i match
+  { ImportExpr(stable_id, grp) -> 
+      iimports-stable-id(s, stable_id, grp)
   }.
 
-iimports-path-steps-qualified(s_imp, s, psteps, grp) :- psteps match
+iimports-stable-id(s, stable_id, grp) :- {psteps}
+    path-to-list(stable_id, psteps)
+  , psteps match { id:ids -> // paths have length at least one
+      {s_obj}
+        resolve-object(s, id, s_obj)
+      , iimports-path-steps(s, s_obj, ids, grp)
+    }.
+
+iimports-path-steps(s, s_obj, psteps, grp) :- psteps match
   { [] -> grp match
-      { IId(id) -> {lbl, decl, s_iimport}
-          resolve-qualified-decl(s, id, lbl, decl)
+      { IId(id) -> {lbl, s_iimport, decls}
+          resolve-local-decl(s_obj, id, decls)
         , new s_iimport
-        , s_imp -[ `IMPORT ]-> s_iimport
-        , has-labeled-decl(s_iimport, lbl, decl)
+        , s -[ `I ]-> s_iimport
+        , copy-decls(s_iimport, decls)
       | IWild() ->
-          s_imp -[ `WILDCARD ]-> s
+          s -[ `W ]-> s_obj
       }
-  | id:ids -> {s_step}
-      resolve-qualified-obj-scope(s, id, s_step)
-    , iimports-path-steps-qualified(s_imp, s_step, ids, grp)
+  | id:ids -> {s_obj'}
+      resolve-object(s_obj, id, s_obj')
+    , iimports-path-steps(s, s_obj', ids, grp)
   }.
 
-has-labeled-decl(s, lbl, decl) :- lbl match
-  { `DEF -> s -[ `DEF ]-> decl
-  | `OBJ -> s -[ `OBJ ]-> decl }.
+copy-decls(s, decls) :- decls match
+  { [] -> true
+  | p:ds -> {l, d}
+      last(p, l, d)
+      , l match
+        { `VAL -> s -[ `VAL ]-> d
+        | `TYPE -> s -[ `TYPE ]-> d
+        }
+      , copy-decls(s, ds)
+  }.

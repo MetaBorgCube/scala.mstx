@@ -6,14 +6,24 @@ main(prog) :- {s}
   , compilation-unit-ok(s, prog).
 
 compilation-unit-ok(s, cu) :- {s_prelude, s_cu}
-    new s_cu
-  , s_cu -[ `PRELUDE ]-> s
+  new s_cu
+
+  // the implicit import to the predef:
+  // https://www.scala-lang.org/files/archive/spec/2.12/09-top-level-definitions.html
+  , s_cu -[ `I ]-> s
+
+  // we also mark this as the predefined module
+  // to type literals correctly
+  , s_cu -[ `PREDEF ]-> s
+
+  // the body of the compilation unit
   , cu match
       { CompilationUnit(_, topstats) ->
           top-statements-ok(s_cu, topstats)
       }.
 
 // Populate root scope with standard library classes, such as Int, Boolean, etc.
+// See https://www.scala-lang.org/files/archive/spec/2.12/12-the-scala-standard-library.html#the-predef-object
 prelude-ok(s) :-
     builtin-class(s, "Int")
   , builtin-class(s, "Boolean")
@@ -31,6 +41,6 @@ top-statements-ok(s, topstats) :- topstats match
   }.
 
 top-statement-ok(s, stat) :- stat match
-  { DF2TS(ann, mod, def) -> definition-ok(s, def)
+  { DF2TS(ann, mod, def) -> definition-ok(s, s, def)
   }.
 

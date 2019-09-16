@@ -1,30 +1,49 @@
 import stdlib.sets
 import scala.statements
+import scala.type
+import scala.expr
 
-// Is this what Scala does? Distinguishes values (objects, ...) and types (classes, traits, ...)?
 no-duplicate-values(s, name, ty) :- {defs, matches}
-    query s `OBJ|`DEF as defs
+    query s `VAL as defs
   , filter defs ((name', ty') where name' == name, ty' != ty) matches
   , empty(matches).
 
-definition-ok(s, def) :- def match
+no-duplicate-types(s, name, ty) :- {tydefs, matches}
+    query s `TYPE as tydefs
+  , filter tydefs ((name', ty') where name' == name, ty' != ty) matches
+  , empty(matches).
+
+definition-ok(s_mod, s, def) :- def match
+  { ValDef(name, ty, e) -> {s_val, typ}
+      new s_val -> (name, typ)
+      , s_mod -[ `VAL ]-> s_val 
+
+      , type-ok(s, ty, typ)
+      , expr-ok(s, e, typ)
+  | OD2TD(od) -> object-def-ok(s_mod, s, od)
+  }.
+
+object-def-ok(s_mod, s, def) :- def match
   { ObjectDef(name, ext_clause, body) -> {s_obj, s_imp, self}
       self == OBJECT(s_obj)
     , new s_obj -> (name, self)
-    , s_obj -[ `LEX ]-> s
-    , s -[ `OBJ ]-> s_obj
-    , new s_imp
-    , s_imp -[ `EPS ]-> s_obj
-    , extends-clause-ok(s, s_obj, ext_clause)
-    , template-body-ok(s_imp, s_obj, body)
-    , no-duplicate-values(s, name, self)
+
+    // declare
+    , s_mod -[ `VAL ]-> s_obj
+    , no-duplicate-values(s_mod, name, self)
+
+    // link the object
+    , s_obj -[ `P ]-> s
+
+    // check the body
+    , template-body-ok(s_obj, s_obj, body)
   }.
 
 extends-clause-ok(s, s_obj, ext_clause) :- ext_clause match
-  { None() -> true
-  | _      -> false // FIXME
+  { NoExtends() -> true
+  | _           -> false // FIXME
   }.
 
-template-body-ok(s_imp, s_obj, body) :- body match
-  { TemplateBody(self_type, stmts) -> stmts-ok(s_imp, s_obj, stmts) // FIXME
+template-body-ok(s_mod, s, body) :- body match
+  { TemplateBody(self_type, stmts) -> stmts-ok(s_mod, s, stmts) // FIXME
   }.
