@@ -16,7 +16,7 @@ type-ok(s, t, ty) :- t match
 
 predef-type-ok(s, tyname, ty) :- {tys, ps, p, n}
   query s `B*(`P`B*)*`PREDEF`TYPE as tys
-  , filter tys ((name, _) where name == tyname) ps
+  , filter tys ((name, _) where name == Id(tyname)) ps
   , only(ps, p)
   , datum(p, (n, ty)).
   
