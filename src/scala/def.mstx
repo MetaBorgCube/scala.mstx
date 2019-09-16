@@ -18,7 +18,7 @@ def-ok(s_mod, s, def) :- def match
   }.
 
 type-definition-ok(s_mod, s, tydef) :- tydef match
-  { TypeDef(name, decl) -> type-decl(s_mod, s, name, decl)
+  { TypeDef(name, decl) -> type-decl(s_mod, s, Id(name), decl)
   }.
 
 function-definition-ok(s_mod, s, fs) :- fs match

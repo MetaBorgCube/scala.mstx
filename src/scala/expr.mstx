@@ -4,12 +4,8 @@ import scala.type.reference
 import scala.paths
 
 expr-ok(s, e, ty) :- e match
-  { Lit(l) ->
-      literal-ok(s, l, ty)
-  | PathExpr(SID2P(p)) -> // unqualified
-      path-expr-ok(s, p, ty)
-  | PathExpr(StableId(p)) -> // qualified
-      path-expr-ok(s, p, ty)
+  { Lit(l) -> literal-ok(s, l, ty)
+  | PathExpr(pe) -> path-expr-ok(s, pe, ty)
   | _ -> false // FIXME
   }.
 
@@ -21,11 +17,6 @@ literal-ok(s, l, ty) :- l match
       }
   }.
 
-path-expr-ok(s, p, ty) :- p match
-  { Path(p', id) -> {s_obj, ps, p, n, ty'}
-      resolve-path(s, p, OBJECT(n, s_obj))
-      , resolve-local-decl(s_obj, id, ps)
-      , only(ps, p)
-      , last(p, `VAL, ty')
-      , compatible-ty(ty, ty')
+path-expr-ok(s, pe, ty) :- pe match
+  { SID2P(id)   -> stable-type-ok(s, id, ty)
   }.

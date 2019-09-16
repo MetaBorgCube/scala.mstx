@@ -1,0 +1,26 @@
+import stdlib.lists
+import stdlib.paths
+import scala.type.reference
+
+// path-to-list : Path -> List(Id)
+path-to-list(p, psteps) :- p match
+  { UnqualifiedId(id) -> psteps == id:[]
+  | QualifiedId(path, id) -> {psteps0}
+      path-to-list(path, psteps0)
+      , append(psteps0, id:[], psteps)
+  }.
+
+resolve-path(s, p, s_inner) :- {ids}
+    path-to-list(p, ids)
+  , ids match { id:ids -> // paths have length at least one
+      {s_obj}
+        resolve-object(s, id, s_obj)
+      , resolve-path-ids(s_obj, ids, s_inner)
+    }.
+
+resolve-path-ids(s_obj, ids, s_inner) :- ids match
+  { id:[]  -> s_inner == s_obj
+  | id:ids -> {s_obj'}
+      resolve-object(s_obj, id, s_obj')
+      , resolve-path-ids(s_obj', ids, s_inner)
+  }.

@@ -1,6 +1,9 @@
 import stdlib.sets
 import stdlib.paths
 
+import scala.type.reference
+import scala.paths
+
 no-duplicate-types(s, name, ty) :- {tydefs, matches}
     query s `TYPE as tydefs
   , filter tydefs ((name', ty') where name' == name) matches
@@ -23,6 +26,23 @@ type-ok(s, t, ty) :- t match
   //     }
   { IF2TY(t) -> annot-type-ok(s, t, ty) }.
 
+type-id-ok(s, id, ty) :- {types, matches, visible, p, d}
+  query s (`B*(`P`B*)*(`I|`W)?`TYPE) as types
+  , filter types ((name, _) where name == id) matches
+  , min matches scala visible
+  , only(visible, p)
+  , datum(p, (id, ty)).
+
+stable-type-ok(s, p, ty) :- p match
+  { UnqualifiedId(id)   -> type-id-ok(s, Id(id), ty)
+  | QualifiedId(p', id) -> {s_obj, ps, p, n, ty'}
+      resolve-path(s, p, OBJECT(n, s_obj))
+      , resolve-local-decl(s_obj, id, ps)
+      , only(ps, p)
+      , last(p, `VAL, ty')
+      , compatible-ty(ty, ty')
+  }.
+
 predef-type-ok(s, tyname, ty) :- {tys, ps, p, n}
   query s `B*(`P`B*)*`PREDEF`TYPE as tys
   , filter tys ((name, _) where name == Id(tyname)) ps
@@ -30,14 +50,7 @@ predef-type-ok(s, tyname, ty) :- {tys, ps, p, n}
   , datum(p, (n, ty)).
   
 annot-type-ok(s, annot_t, ty) :- annot_t match
-  { ST2AT(id, annot_opt) -> {types, matches, visible, p, d}
-      query s (`B*(`P`B*)*(`I|`W)?`TYPE) as types
-    , filter types ((name, _) where name == id) matches
-    , min matches scala visible
-    , only(visible, p)
-    , datum(p, d)
-    , d match { (_, ty0) -> ty == ty0 }
-  }.
+  { ST2AT(id, annot_opt) -> stable-type-ok(s, id, ty) }.
 
 // A type `ty0` is compatible with any 0-argument method that returns `ty`
 compatible-ty(ty0, ty) :- // {ty_unpack}

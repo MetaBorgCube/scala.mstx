@@ -1,14 +1,14 @@
-{
+object O {
   object M {
-    type A = Int
-  }
+    type A = Int;
+  };
   object N {
-    type A = Boolean
-  }
+    type A = Boolean;
+  };
 
-  import M.A
-  {
-    import N._
-    val x : A = 3
-  }
-}
+  import M.A;
+  object I {
+    import N._;
+    val x : A = 3;
+  };
+};
