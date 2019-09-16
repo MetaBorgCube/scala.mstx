@@ -1,9 +1,18 @@
+import stdlib.sets
 import stdlib.paths
 
+no-duplicate-types(s, name, ty) :- {tydefs, matches}
+    query s `TYPE as tydefs
+  , filter tydefs ((name', ty') where name' == name) matches
+  , singleton(matches).
+
 type-decl(s_mod, s, name, ty) :- {s_ty, typ}
-  new s_ty -> (name, typ),
-  s_mod -[ `TYPE ]-> s_ty,
-  type-ok(s, ty, typ).
+  new s_ty -> (name, typ)
+
+  , s_mod -[ `TYPE ]-> s_ty
+  , no-duplicate-types(s_mod, ty, typ)
+
+  , type-ok(s, ty, typ).
 
 type-ok(s, t, ty) :- t match
   // { FunTy(arg_t, ret_t) -> arg_t match

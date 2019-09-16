@@ -5,13 +5,8 @@ import scala.expr
 
 no-duplicate-values(s, name, ty) :- {defs, matches}
     query s `VAL as defs
-  , filter defs ((name', ty') where name' == name, ty' != ty) matches
-  , empty(matches).
-
-no-duplicate-types(s, name, ty) :- {tydefs, matches}
-    query s `TYPE as tydefs
-  , filter tydefs ((name', ty') where name' == name, ty' != ty) matches
-  , empty(matches).
+  , filter defs ((name', ty') where name' == name) matches
+  , singleton(matches).
 
 definition-ok(s_mod, s, def) :- def match
   { ValDef(name, ty, e) -> {s_val, typ}
