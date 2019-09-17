@@ -20,18 +20,29 @@ iimports-selector(s, s_obj, grp) :- grp match
       , has-decls(s_imp, decls)
   | IWild() ->
       s -[ `W ]-> s_obj
+
+  // Everything is hidden by default.
+  // Only reveal a specific set.
+  // Every name can only be mentioned once,
+  // so hide clauses have no effect.
   | IReveal(sels) -> {s_imp, decls}
       new s_imp
       , s -[ `I ]-> s_imp
       , local-decls(s_obj, decls)
       , imports-list(s_imp, decls, sels)
       , renamings(s_imp, decls, sels)
-  | IHide(sels) -> {s_imp, decls}
-      new s_imp
-      , s -[ `I ]-> s_imp
+
+  // Everything is revealed by a wildcard by default.
+  // Except when things are hidden explicitly.
+  // Renamings and explicit imports have higher precedence then
+  // implicit imports.
+  | IHide(sels) -> {s_implicit, s_imp, decls}
+        new s_implicit, s -[ `W ]-> s_implicit
+      , new s_imp, s -[ `I ]-> s_imp
       , local-decls(s_obj, decls)
-      , imports-everything-but(s_imp, decls, sels)
+      , imports-everything-but(s_implicit, decls, sels)
       , renamings(s_imp, decls, sels)
+      , imports-list(s_imp, decls, sels)
   }.
 
 imports-list(s, ps, sels) :-
@@ -93,8 +104,9 @@ pattern-selects(id, sel, b) :- sel match
   }.
 
 pattern-hides(id, sel, b) :- sel match
-  { Hide(x) where x == id -> is-true(b)
-  | _                     -> is-false(b)
+  { Hide(x) where x == id   -> is-true(b)
+  | Rename(x) where x == id -> is-true(b)
+  | _                       -> is-false(b)
   }.
 
 pattern-renames(id, sel, id') :- sel match
