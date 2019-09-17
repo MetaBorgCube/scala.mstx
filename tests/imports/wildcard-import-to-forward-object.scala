@@ -1,8 +1,8 @@
 object A {
   import B._;
-  def g = f;
+  val y : X = 42;
 };
 
 object B {
-  def f = 42;
+  type X = Int;
 };

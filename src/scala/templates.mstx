@@ -9,11 +9,12 @@ no-duplicate-values(s, name, ty) :- {defs, matches}
   , singleton(matches).
 
 definition-ok(s_mod, s, def) :- def match
-  { ValDef(name, ty, e) -> {s_val, typ}
+  { ValDef(name, ty, e) -> {s_val, cls, typ}
       new s_val -> (name, typ)
       , s_mod -[ `VAL ]-> s_val 
 
-      , type-ok(s, ty, typ)
+      , type-ok(s, ty, cls)
+      , class-instance(cls, typ)
       , expr-ok(s, e, typ)
   | OD2TD(od) -> object-def-ok(s_mod, s, od)
   }.

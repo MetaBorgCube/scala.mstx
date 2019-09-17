@@ -1,9 +1,10 @@
 object A {
   object B {
+    val x : Int = 42;
   };
 };
 
 object C {
   import A.B;
-  import B._;
+  val y : Int = x;
 };

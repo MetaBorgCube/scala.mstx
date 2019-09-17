@@ -9,12 +9,20 @@ resolve-local-decl(s, name, decls) :- {ps}
   local-decls(s, ps)
   , filter ps ((name', _) where name' == name) decls.
 
-resolve-object(s, id, s_obj) :- {vs, matches, ps, p}
+// find objects in the current scope s
+resolve-object(s, id, s_obj) :- {vs}
   query s `B*(`P`B*)*(`W|`I)?`VAL as vs
-  , filter vs ((name, _) where name == id) matches
+  , disambiguate-object(vs, id, s_obj).
+
+resolve-object-locally(s, id, s_obj) :- {vs}
+  local-decls(s, vs)
+  , disambiguate-object(vs, id, s_obj).
+
+disambiguate-object(reach, id, s_obj) :- {matches, ps, p}
+  filter reach ((name, _) where name == id) matches
   , min matches scala ps
   , only(ps, p)
-  , {n} datum(p, (n, OBJECT(s_obj))).
+  , datum(p, (id, OBJECT(s_obj))).
 
 // resolve-unqualified-obj-scope(s, id, s_obj) :- {lbl, decl, d}
 //     resolve-unqualified-decl(s, id, lbl, decl)

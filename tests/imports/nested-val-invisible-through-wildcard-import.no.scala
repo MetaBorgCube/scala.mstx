@@ -1,10 +1,10 @@
 object A {
   object B {
-    def f = 42;
+    val x : Int = 42;
   };
 };
 
 object C {
   import A._;
-  def g = f; // unbound ref
+  val y : Int = x;
 };

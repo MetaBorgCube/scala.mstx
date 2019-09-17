@@ -12,15 +12,15 @@ path-to-list(p, psteps) :- p match
 
 resolve-path(s, p, s_inner) :- {ids}
     path-to-list(p, ids)
-  , ids match { id:ids -> // paths have length at least one
+  , ids match { id:ids' -> // paths have length at least one
       {s_obj}
         resolve-object(s, id, s_obj)
-      , resolve-path-ids(s_obj, ids, s_inner)
+      , resolve-path-ids(s_obj, ids', s_inner)
     }.
 
 resolve-path-ids(s_obj, ids, s_inner) :- ids match
-  { id:[]  -> s_inner == s_obj
+  { id:[]  -> resolve-object-locally(s_obj, id, s_inner)
   | id:ids -> {s_obj'}
-      resolve-object(s_obj, id, s_obj')
+      resolve-object-locally(s_obj, id, s_obj')
       , resolve-path-ids(s_obj', ids, s_inner)
   }.

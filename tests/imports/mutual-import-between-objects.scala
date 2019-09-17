@@ -1,9 +1,9 @@
 object A {
   import B._;
-  def g: Int = f;
+  val x : Int = y;
 };
 
 object B {
   import A._;
-  def f: Int = g;
+  val y : Int = x;
 };

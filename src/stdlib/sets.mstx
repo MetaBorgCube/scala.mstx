@@ -1,3 +1,9 @@
+import stdlib.paths
+
 empty(set) :- every set (x -> false).
 
 singleton(set) :- {anything} only(set, anything).
+
+same(set, m) :- every set (p -> p == m).
+
+same-target(set, m) :- every set (p -> tgt(p, m)).
