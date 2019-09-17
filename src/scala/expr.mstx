@@ -7,10 +7,19 @@ expr-ok(s, e, ty) :- e match
   { Lit(l)       ->
       literal-ok(s, l, ty)
   | PathExpr(pe) ->
-      path-type-ok(s, pe, ty)
-    , is-value-type(ty)
+      path-expr-ok(s, pe, ty)
   | _ ->
       false // FIXME
+  }.
+
+path-expr-ok(s, p, ty) :- p match
+  { UnqualifiedId(id)   -> var-ok(s, id, ty)
+  | QualifiedId(p', id) -> {s_obj, ps, op, s_d}
+      resolve-path(s, p', s_obj)
+      , resolve-local-decl(s_obj, id, ps)
+      , only(ps, op)
+      , tgt(op, s_d)
+      , s_d -> (id, ty)
   }.
 
 literal-ok(s, l, ty) :- l match

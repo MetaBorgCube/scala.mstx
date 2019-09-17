@@ -1,5 +1,6 @@
 import stdlib.paths
 import stdlib.lists
+import stdlib.sets
 
 // Resolve a name locally in a given scope to a set of declarations in that scope
 local-decls(s, ps) :-
@@ -23,6 +24,26 @@ disambiguate-object(reach, id, s_obj) :- {matches, ps, p}
   , min matches scala ps
   , only(ps, p)
   , datum(p, (id, OBJECT(s_obj))).
+
+var-ok(s, id, ty) :- {types, matches, visible, sd}
+  query s (`B*(`P`B*)*(`I|`W)?`VAL) as types
+  , filter types ((name, _) where name == id) matches
+  , min matches scala visible
+  // the scala spec states that ambiguity is okay, as long as
+  // they all resolve in the end to the same declaration
+  , inhabited(visible)
+  , same-target(visible, sd)
+  , sd -> (id, ty).
+
+typeref-ok(s, id, ty) :- {types, matches, visible, sd}
+  query s (`B*(`P`B*)*(`I|`W)?`TYPE) as types
+  , filter types ((name, _) where name == id) matches
+  , min matches scala visible
+  // the scala spec states that ambiguity is okay, as long as
+  // they all resolve in the end to the same declaration
+  , inhabited(visible)
+  , same-target(visible, sd)
+  , sd -> (id, ty).
 
 // resolve-unqualified-obj-scope(s, id, s_obj) :- {lbl, decl, d}
 //     resolve-unqualified-decl(s, id, lbl, decl)

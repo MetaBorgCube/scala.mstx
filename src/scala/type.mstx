@@ -30,18 +30,8 @@ type-ok(s, t, ty) :- t match
   //     }
   { IF2TY(t) -> annot-type-ok(s, t, ty) }.
 
-type-id-ok(s, id, ty) :- {types, matches, visible, sd}
-  query s (`B*(`P`B*)*(`I|`W)?(`TYPE|`VAL)) as types
-  , filter types ((name, _) where name == id) matches
-  , min matches scala visible
-  // the scala spec states that ambiguity is okay, as long as
-  // they all resolve in the end to the same declaration
-  , inhabited(visible)
-  , same-target(visible, sd)
-  , sd -> (id, ty).
-
 path-type-ok(s, p, ty) :- p match
-  { UnqualifiedId(id)   -> type-id-ok(s, id, ty)
+  { UnqualifiedId(id)   -> typeref-ok(s, id, ty)
   | QualifiedId(p', id) -> {s_obj, ps, op, s_d}
       resolve-path(s, p', s_obj)
       , resolve-local-decl(s_obj, id, ps)
