@@ -5,27 +5,11 @@ import stdlib.maybe
 import scala.type.reference
 import scala.paths
 
-iimport-ok(s, s', i) :- i match
-  { ImportExpr(stable_id, grp) -> 
-      iimports-stable-id(s, s', stable_id, grp)
-  }.
-
-// s is where we will create the import edge
-// s' is where we are resolving into
-iimports-stable-id(s, s', stable_id, grp) :- {psteps}
-    path-to-list(stable_id, psteps)
-  , psteps match { id:ids -> // paths have length at least one
-      {s_obj}
-        resolve-object(s', id, s_obj)
-      , iimports-path-steps(s, s_obj, ids, grp)
-    }.
-
-iimports-path-steps(s, s_obj, psteps, grp) :- psteps match
-  { [] ->
-      iimports-selector(s, s_obj, grp)
-  | id:ids -> {s_obj'}
-      resolve-object(s_obj, id, s_obj')
-    , iimports-path-steps(s, s_obj', ids, grp)
+// Import-expression e resolved relative to s', imports into s.
+iimport-ok(s, s', e) :- e match
+  { ImportExpr(path, grp) -> {s_obj}
+      resolve-path(s', path, s_obj)
+      , iimports-selector(s, s_obj, grp)
   }.
 
 iimports-selector(s, s_obj, grp) :- grp match
@@ -33,7 +17,7 @@ iimports-selector(s, s_obj, grp) :- grp match
       resolve-local-decl(s_obj, id, decls)
       , new s_imp
       , s -[ `I ]-> s_imp
-      , copy-decls(s_imp, decls)
+      , has-decls(s_imp, decls)
   | IWild() ->
       s -[ `W ]-> s_obj
   | IReveal(sels) -> {s_imp, decls}
@@ -55,14 +39,14 @@ imports-list(s, ps, sels) :-
       last(p, l, sd)
       , sd -> (id, ty)
       , selects(id, sels, sel)
-      , sel match { True() -> copy-decl(s, l, sd) | False() -> true }).
+      , sel match { True() -> has-decl(s, l, sd) | False() -> true }).
 
 imports-everything-but(s, ps, sels) :-
   every ps (p -> {l, sd, sel, id, ty}
       last(p, l, sd)
       , sd -> (id, ty)
       , hides(id, sels, sel)
-      , sel match { False() -> copy-decl(s, l, sd) | True() -> true }).
+      , sel match { False() -> has-decl(s, l, sd) | True() -> true }).
 
 renamings(s, ps, sels) :-
   every ps (p -> {l, sd, id, to, ty}
@@ -71,9 +55,10 @@ renamings(s, ps, sels) :-
       , renames(id, sels, to)
       , to match
         { Nothing() -> true
-        | Just(id') -> {sd'} new sd' -> (id', ty), copy-decl(s, l, sd') }).
+        | Just(id') -> {sd'} new sd' -> (id', ty), has-decl(s, l, sd') }).
 
-// assumes something is revealed unless hidden
+// sel is a boolean indinciating whether id is hidden
+// by import selectors sels
 hides(id, sels, sel) :- sels match
   { []   -> is-false(sel)
   | s:xs -> {s1, s2}
@@ -82,7 +67,8 @@ hides(id, sels, sel) :- sels match
       , or(s1, s2, sel)
   }.
 
-// assumes something is hidden unless explicitly selected by sels
+// sel is a boolean indinciating whether id is selected
+// by import selectors sels
 selects(id, sels, sel) :- sels match
   { []   -> is-false(sel)
   | s:xs -> {s1, s2}
@@ -91,6 +77,8 @@ selects(id, sels, sel) :- sels match
       , or(s1, s2, sel)
   }.
 
+// id' is a maybe string indicating if and how id
+// is renamed by sels
 renames(id, sels, id') :- sels match
   { []   -> id' == Nothing()
   | s:xs -> {s1, s2, id1, id2}
@@ -114,10 +102,13 @@ pattern-renames(id, sel, id') :- sel match
   | _                          -> is-nothing(id')
   }.
 
-copy-decls(s, decls) :-
-  every decls (p -> {l, d} last(p, l, d) , copy-decl(s, l, d)).
+// s is a scope with all value/type declarations in decls
+has-decls(s, decls) :-
+  every decls (p -> {l, d} last(p, l, d) , has-decl(s, l, d)).
 
-copy-decl(s, l, d) :- l match
-  { `VAL -> s -[ `VAL ]-> d
+// d is a value/type declaration in s
+has-decl(s, l, d) :- l match
+  { `VAL  -> s -[ `VAL ]-> d
   | `TYPE -> s -[ `TYPE ]-> d
+  | _     -> true
   }.

@@ -19,7 +19,7 @@ resolve-path(s, p, s_inner) :- {ids}
     }.
 
 resolve-path-ids(s_obj, ids, s_inner) :- ids match
-  { id:[]  -> resolve-object-locally(s_obj, id, s_inner)
+  { []     -> s_obj == s_inner
   | id:ids -> {s_obj'}
       resolve-object-locally(s_obj, id, s_obj')
       , resolve-path-ids(s_obj', ids, s_inner)
