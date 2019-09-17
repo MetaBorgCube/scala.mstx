@@ -6,6 +6,6 @@ object B {
   def f = true;
   object Inner {
      import A.f;
-     def g = f(); // ambiguous
+     def g = f();
   };
 };

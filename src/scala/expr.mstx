@@ -4,19 +4,15 @@ import scala.type.reference
 import scala.paths
 
 expr-ok(s, e, ty) :- e match
-  { Lit(l) -> literal-ok(s, l, ty)
-  | PathExpr(pe) -> path-expr-ok(s, pe, ty)
+  { Lit(l)       -> literal-ok(s, l, ty)
+  | PathExpr(pe) -> path-type-ok(s, pe, ty)
   | _ -> false // FIXME
   }.
 
 literal-ok(s, l, ty) :- l match
-  { IntLit(n) -> predef-type-ok(s, "Int", ty)
-  | BoolLit(b) -> b match
+  { IntLit(n)   -> predef-type-ok(s, "Int", ty)
+  | BoolLit(b)  -> b match
       { True()  -> predef-type-ok(s, "Boolean", ty)
       | False() -> predef-type-ok(s, "Boolean", ty)
       }
-  }.
-
-path-expr-ok(s, pe, ty) :- pe match
-  { SID2P(id)   -> stable-type-ok(s, id, ty)
   }.

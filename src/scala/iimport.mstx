@@ -22,7 +22,7 @@ iimports-stable-id(s, s', stable_id, grp) :- {psteps}
 iimports-path-steps(s, s_obj, psteps, grp) :- psteps match
   { [] -> grp match
       { IId(id) -> {lbl, s_iimport, decls}
-          resolve-local-decl(s_obj, Id(id), decls)
+          resolve-local-decl(s_obj, id, decls)
         , new s_iimport
         , s -[ `I ]-> s_iimport
         , copy-decls(s_iimport, decls)

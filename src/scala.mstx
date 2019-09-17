@@ -31,7 +31,7 @@ prelude-ok(s) :-
 
 builtin-class(s, id) :- {class, s_class}
     class == CLASS(s_class)
-  , new s_class -> (Id(id), class)
+  , new s_class -> (id, class)
   , s -[ `TYPE ]-> s_class
   .
 
