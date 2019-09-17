@@ -1,0 +1,7 @@
+is-nothing(m) :- m == Nothing().
+is-just(m) :- {x} m == Just(x).
+
+maybe-or(m1, m2, m3) :- m1 match
+  { Nothing() -> m3 == m2
+  | Just(x)   -> m3 == Just(x)
+  }.

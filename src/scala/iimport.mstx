@@ -1,5 +1,6 @@
 import stdlib.paths
 import stdlib.bools
+import stdlib.maybe
 
 import scala.type.reference
 import scala.paths
@@ -28,34 +29,49 @@ iimports-path-steps(s, s_obj, psteps, grp) :- psteps match
   }.
 
 iimports-selector(s, s_obj, grp) :- grp match
-  { IId(id) -> {lbl, s_iimport, decls}
+  { IId(id) -> {lbl, s_imp, decls}
       resolve-local-decl(s_obj, id, decls)
-      , new s_iimport
-      , s -[ `I ]-> s_iimport
-      , copy-decls(s_iimport, decls)
+      , new s_imp
+      , s -[ `I ]-> s_imp
+      , copy-decls(s_imp, decls)
   | IWild() ->
       s -[ `W ]-> s_obj
-  | IReveal(sels) ->
-      iimports-selections(s, s_obj, sels)
-  | IHide(sels) ->
-      iimports-hides(s, s_obj, sels)
+  | IReveal(sels) -> {s_imp, decls}
+      new s_imp
+      , s -[ `I ]-> s_imp
+      , local-decls(s_obj, decls)
+      , imports-list(s_imp, decls, sels)
+      , renamings(s_imp, decls, sels)
+  | IHide(sels) -> {s_imp, decls}
+      new s_imp
+      , s -[ `I ]-> s_imp
+      , local-decls(s_obj, decls)
+      , imports-everything-but(s_imp, decls, sels)
+      , renamings(s_imp, decls, sels)
   }.
 
-iimports-selections(s, s_obj, sels) :- {ps}
-  local-decls(s_obj, ps)
-  , every ps (p -> {l, sd, sel, id, ty}
+imports-list(s, ps, sels) :-
+  every ps (p -> {l, sd, sel, id, ty}
       last(p, l, sd)
       , sd -> (id, ty)
       , selects(id, sels, sel)
       , sel match { True() -> copy-decl(s, l, sd) | False() -> true }).
 
-iimports-hides(s, s_obj, sels) :- {ps}
-  local-decls(s_obj, ps)
-  , every ps (p -> {l, sd, sel, id, ty}
+imports-everything-but(s, ps, sels) :-
+  every ps (p -> {l, sd, sel, id, ty}
       last(p, l, sd)
       , sd -> (id, ty)
       , hides(id, sels, sel)
       , sel match { False() -> copy-decl(s, l, sd) | True() -> true }).
+
+renamings(s, ps, sels) :-
+  every ps (p -> {l, sd, id, to, ty}
+      last(p, l, sd)
+      , sd -> (id, ty)
+      , renames(id, sels, to)
+      , to match
+        { Nothing() -> true
+        | Just(id') -> {sd'} new sd' -> (id', ty), copy-decl(s, l, sd') }).
 
 // assumes something is revealed unless hidden
 hides(id, sels, sel) :- sels match
@@ -75,22 +91,28 @@ selects(id, sels, sel) :- sels match
       , or(s1, s2, sel)
   }.
 
+renames(id, sels, id') :- sels match
+  { []   -> id' == Nothing()
+  | s:xs -> {s1, s2, id1, id2}
+      pattern-renames(id, s, id1)
+      , renames(id, xs, id2)
+      , maybe-or(id1, id2, id')
+  }.
+
 pattern-selects(id, sel, b) :- sel match
   { Select(x) where x == id -> is-true(b)
-  | Rename(_)               -> false  // not implemented
   | _                       -> is-false(b)
   }.
 
 pattern-hides(id, sel, b) :- sel match
   { Hide(x) where x == id -> is-true(b)
-  | Rename(_)             -> false  // not implemented
   | _                     -> is-false(b)
   }.
 
-// not in the chosen subset
-// can be implemented by filtering s_obj by all the names in grp
-// and adding a wildcard edge to that scope
-iimports-option-wildcard(s, s_obj, wildcard, grp) :- false.
+pattern-renames(id, sel, id') :- sel match
+  { Rename(x, y) where x == id -> id' == Just(y)
+  | _                          -> is-nothing(id')
+  }.
 
 copy-decls(s, decls) :-
   every decls (p -> {l, d} last(p, l, d) , copy-decl(s, l, d)).
