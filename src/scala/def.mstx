@@ -14,7 +14,17 @@ no-duplicate-defs(s, name, ty) :- {defs, matches}
 def-ok(s_mod, s, def) :- def match
   { FD2DF(fs)        -> function-definition-ok(s_mod, s, fs)
   | TD2DF(typedef)   -> type-definition-ok(s_mod, s, typedef)
-  | TMDF2DF(tmpldef) -> definition-ok(s_mod, s, tmpldef)
+  | TMDF2DF(tmpldef) -> template-def-ok(s_mod, s, tmpldef)
+  }.
+
+template-def-ok(s_mod, s, def) :- def match
+  { ValDef(name, ty, e) -> {s_val, cls, typ}
+      new s_val -> (name, typ)
+      , s_mod -[ `VAL ]-> s_val 
+      , type-ok(s, ty, cls)
+      , expr-ok(s, e, typ)
+      , class-instance(cls, typ)
+  | OD2TD(od) -> object-def-ok(s_mod, s, od)
   }.
 
 type-definition-ok(s_mod, s, tydef) :- tydef match

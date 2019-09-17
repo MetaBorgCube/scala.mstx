@@ -1,16 +1,26 @@
 import scala.def
 import scala.iimport
 
+top-statements-ok(s, topstats) :- topstats match
+  { st:stmts -> top-statement-ok(s, st), top-statements-ok(s, stmts)
+  | []       -> true
+  }.
+
+top-statement-ok(s, stat) :- stat match
+  { DF2TS(ann, mod, def) -> template-def-ok(s, s, def)
+  }.
+
 stmts-ok(s_mod, s, stmts) :- stmts match
   { [] -> true
-  | stmt:stmts -> stmt match
-      { DF2TM(annot, modif, def) ->
-          def-ok(s_mod, s, def)
-        , stmts-ok(s_mod, s, stmts)
-      | IM2TM(imp) -> {s'}
-          new s'
-        , s' -[ `B ]-> s
-        , iimport-ok(s', s, imp)
-        , stmts-ok(s_mod, s', stmts)
-      }
+  | stmt:stmts -> {s'} stmt-ok(s_mod, s, stmt, s'), stmts-ok(s_mod, s', stmts)
   }.
+
+stmt-ok(s_mod, s, stmt, s') :- stmt match
+ { DF2TM(annot, modif, def) ->
+     def-ok(s_mod, s, def)
+     , s == s'
+ | IM2TM(imp) ->
+     new s'
+     , s' -[ `B ]-> s
+     , iimport-ok(s', s, imp)
+ }.
