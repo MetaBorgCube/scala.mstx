@@ -1,4 +1,5 @@
 import stdlib.paths
+import stdlib.bools
 
 import scala.type.reference
 import scala.paths
@@ -18,27 +19,83 @@ iimports-stable-id(s, s', stable_id, grp) :- {psteps}
       , iimports-path-steps(s, s_obj, ids, grp)
     }.
 
-// TODO BUG this gets stuck if s == s_obj
 iimports-path-steps(s, s_obj, psteps, grp) :- psteps match
-  { [] -> grp match
-      { IId(id) -> {lbl, s_iimport, decls}
-          resolve-local-decl(s_obj, id, decls)
-        , new s_iimport
-        , s -[ `I ]-> s_iimport
-        , copy-decls(s_iimport, decls)
-      | IWild() ->
-          s -[ `W ]-> s_obj
-      }
+  { [] ->
+      iimports-selector(s, s_obj, grp)
   | id:ids -> {s_obj'}
       resolve-object(s_obj, id, s_obj')
     , iimports-path-steps(s, s_obj', ids, grp)
   }.
 
-copy-decls(s, decls) :- every decls 
-  (p -> {l, d}
-      last(p, l, d)
-      , l match
-        { `VAL -> s -[ `VAL ]-> d
-        | `TYPE -> s -[ `TYPE ]-> d
-        }
-   ).
+iimports-selector(s, s_obj, grp) :- grp match
+  { IId(id) -> {lbl, s_iimport, decls}
+      resolve-local-decl(s_obj, id, decls)
+      , new s_iimport
+      , s -[ `I ]-> s_iimport
+      , copy-decls(s_iimport, decls)
+  | IWild() ->
+      s -[ `W ]-> s_obj
+  | IReveal(sels) ->
+      iimports-selections(s, s_obj, sels)
+  | IHide(sels) ->
+      iimports-hides(s, s_obj, sels)
+  }.
+
+iimports-selections(s, s_obj, sels) :- {ps}
+  local-decls(s_obj, ps)
+  , every ps (p -> {l, sd, sel, id, ty}
+      last(p, l, sd)
+      , sd -> (id, ty)
+      , selects(id, sels, sel)
+      , sel match { True() -> copy-decl(s, l, sd) | False() -> true }).
+
+iimports-hides(s, s_obj, sels) :- {ps}
+  local-decls(s_obj, ps)
+  , every ps (p -> {l, sd, sel, id, ty}
+      last(p, l, sd)
+      , sd -> (id, ty)
+      , hides(id, sels, sel)
+      , sel match { False() -> copy-decl(s, l, sd) | True() -> true }).
+
+// assumes something is revealed unless hidden
+hides(id, sels, sel) :- sels match
+  { []   -> is-false(sel)
+  | s:xs -> {s1, s2}
+      pattern-hides(id, s, s1)
+      , hides(id, xs, s2)
+      , or(s1, s2, sel)
+  }.
+
+// assumes something is hidden unless explicitly selected by sels
+selects(id, sels, sel) :- sels match
+  { []   -> is-false(sel)
+  | s:xs -> {s1, s2}
+      pattern-selects(id, s, s1)
+      , selects(id, xs, s2)
+      , or(s1, s2, sel)
+  }.
+
+pattern-selects(id, sel, b) :- sel match
+  { Select(x) where x == id -> is-true(b)
+  | Rename(_)               -> false  // not implemented
+  | _                       -> is-false(b)
+  }.
+
+pattern-hides(id, sel, b) :- sel match
+  { Hide(x) where x == id -> is-true(b)
+  | Rename(_)             -> false  // not implemented
+  | _                     -> is-false(b)
+  }.
+
+// not in the chosen subset
+// can be implemented by filtering s_obj by all the names in grp
+// and adding a wildcard edge to that scope
+iimports-option-wildcard(s, s_obj, wildcard, grp) :- false.
+
+copy-decls(s, decls) :-
+  every decls (p -> {l, d} last(p, l, d) , copy-decl(s, l, d)).
+
+copy-decl(s, l, d) :- l match
+  { `VAL -> s -[ `VAL ]-> d
+  | `TYPE -> s -[ `TYPE ]-> d
+  }.

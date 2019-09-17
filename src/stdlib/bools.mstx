@@ -1,0 +1,12 @@
+is-true(b)  :- b == True().
+is-false(b) :- b == False().
+
+or(b1, b2, b3) :- b1 match
+ { True()  -> is-true(b3)
+ | False() -> b2 == b3
+ }.
+
+and(b1, b2, b3) :- b1 match
+ { True() -> b3 == b2
+ | False() -> is-false(b3)
+ }.
