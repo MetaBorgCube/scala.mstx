@@ -24,7 +24,7 @@ value-def-ok(s_mod, s, valdef) :- valdef match
       , type-ok(s, ty, cls)
       , expr-ok(s, e, typ)
       , class-instance(cls, typ) 
-      , no-duplicate-defs(s, name)
+      , no-duplicate-defs(s_mod, name)
   }.
 
 template-def-ok(s_mod, s, def) :- def match

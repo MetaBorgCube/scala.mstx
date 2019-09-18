@@ -6,7 +6,7 @@ The following features are specified:
 - `object` declarations
 - type annotated `val` declarations in objects
 - type declarations in objects
-- function defs in objects with multiple, multi-argument clauses
+- function defs in objects with multiple, n-ary parameter clauses
 - block expressions with and without return expressions
 - lexical scoping
 - wildcard imports `import A.B.C._`
