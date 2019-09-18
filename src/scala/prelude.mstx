@@ -3,6 +3,7 @@
 prelude-ok(s) :-
     builtin-class(s, "Int")
   , builtin-class(s, "Boolean")
+  , builtin-class(s, "()")
   .
 
 builtin-class(s, id) :- {class, s_class}

@@ -1,12 +1,32 @@
-import scala.type
 import stdlib.paths
+
+import scala.type
 import scala.type.reference
 import scala.paths
+import scala.statements
 
 expr-ok(s, e, ty) :- e match
   { Lit(l)       -> literal-ok(s, l, ty)
   | PathExpr(pe) -> path-expr-ok(s, pe, ty)
+  | BE2EX(be)    -> block-expr-ok(s, be, ty)
   | _            -> false // other expressions are not supported
+  }.
+
+maybe-expr-ok(s, me, ty) :- me match
+  { Some(e) -> expr-ok(s, e, ty)
+  | None()  -> predef-type-instance(s, "()", ty)
+  }.
+
+block-expr-ok(s, be, ty) :- be match
+  { BL2BE(block) -> block-ok(s, block, ty)
+  }.
+  
+block-ok(s, bl, ty) :- bl match
+  { Block(bstmts, e) -> {s_block, s'}
+      new s_block -> BLOCK()
+      , s_block -[ `P ]-> s
+      , block-statements-ok(s_block, s_block, bstmts, s')
+      , maybe-expr-ok(s', e, ty)
   }.
 
 path-expr-ok(s, p, ty) :- p match

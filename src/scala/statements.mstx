@@ -10,6 +10,17 @@ stmts-ok(s_mod, s, stmts) :- stmts match
   { [] -> true
   | stmt:stmts -> {s'} stmt-ok(s_mod, s, stmt, s'), stmts-ok(s_mod, s', stmts)
   }.
+  
+block-statements-ok(s_mod, s, bstmts, s') :- bstmts match
+  { [] -> s == s'
+  | stmt:stmts -> {si} 
+      block-statement-ok(s_mod, s, stmt, si), 
+      block-statements-ok(s_mod, si, stmts, s')
+  }.
+  
+block-statement-ok(s_mod, s, bstmt, s') :- bstmt match
+  { DF2BS(def) -> def-ok(s_mod, s, def), s' == s
+  }.
 
 // top-level statements
 top-statement-ok(s, stat) :- stat match
