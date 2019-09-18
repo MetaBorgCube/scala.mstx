@@ -7,7 +7,7 @@ import scala.type
 
 // Scala allows overloaded defs, but not duplicate defs
 no-duplicate-defs(s, name, ty) :- {defs, matches}
-    query s `DEF as defs
+    query s `VAL as defs
   , filter defs ((name', ty') where name' == name, ty' == ty) matches
   , singleton(matches).
 
@@ -40,6 +40,7 @@ function-def-ok(s_mod, s, fundef) :- fundef match
   { FunDef(FS(name, None(), params), Some(retty), body) -> {s_fun, tys, ty}
       new s_fun -> (name, METHOD(tys, ty))
       , s_mod -[ `VAL ]-> s_fun
+      , no-duplicate-defs(s_mod, name, ty)
 
       , parameters-ok(s, s_fun, params, tys)
       , type-ok(s, retty, ty)
