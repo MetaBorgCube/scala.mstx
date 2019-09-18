@@ -68,6 +68,13 @@ As a work-around for this case-study the label order is built into Ministatix.
 This does not in anyway affect scheduling: the delay mechanism works as described in the
 paper, which does not assume any particular form for the path order.
 
+### Syntax
+
+The grammar used for the subset tries to follow the structure of the 
+[official Scala grammar](https://www.scala-lang.org/files/archive/spec/2.13/13-syntax-summary.html).
+This leads to some seemingly unnecessary indirection in the grammar, but makes it easier
+to extend the subset in the future.
+
 ### Scala precedence as a path order
 
 Scala paths are of the form: 

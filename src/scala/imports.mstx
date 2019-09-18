@@ -6,13 +6,13 @@ import scala.type.reference
 import scala.paths
 
 // Import-expression e resolved relative to s', imports into s.
-iimport-ok(s, s', e) :- e match
+import-ok(s, s', e) :- e match
   { ImportExpr(path, grp) -> {s_obj}
       resolve-path(s', path, s_obj)
-      , iimports-selector(s, s_obj, grp)
+      , imports-selector(s, s_obj, grp)
   }.
 
-iimports-selector(s, s_obj, grp) :- grp match
+imports-selector(s, s_obj, grp) :- grp match
   { IId(id) -> {lbl, s_imp, decls}
       resolve-local-decl(s_obj, id, decls)
       , new s_imp

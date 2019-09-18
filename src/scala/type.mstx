@@ -22,12 +22,6 @@ type-decl(s_mod, s, name, ty) :- {s_ty, typ}
   , type-ok(s, ty, typ).
 
 type-ok(s, t, ty) :- t match
-  // { FunTy(arg_t, ret_t) -> arg_t match
-  //     { IFT2FAT(arg_it) -> {arg_ty, ret_ty}
-  //         annot-type-ok(s, arg_it, arg_ty)
-  //       , type-ok(s, ret_t, ret_ty)
-  //       , ty == FUNTY(arg_ty, ret_ty)
-  //     }
   { IF2TY(t) -> annot-type-ok(s, t, ty) }.
 
 path-type-ok(s, p, ty) :- p match
@@ -40,12 +34,14 @@ path-type-ok(s, p, ty) :- p match
       , s_d -> (id, ty)
   }.
 
+// check that tyname is a type def ty in Predef reachable from s
 predef-type-ok(s, tyname, ty) :- {tys, ps, p, n}
   query s `B*(`P`B*)*`PREDEF`TYPE as tys
   , filter tys ((name, _) where name == tyname) ps
   , only(ps, p)
   , datum(p, (n, ty)).
   
+// ty is an instance type of a type named tyname in Predef reachable from s
 predef-type-instance(s, tyname, ty) :- {cls}
   predef-type-ok(s, tyname, cls)
   , class-instance(cls, ty).
@@ -53,16 +49,7 @@ predef-type-instance(s, tyname, ty) :- {cls}
 annot-type-ok(s, annot_t, ty) :- annot_t match
   { ST2AT(id, annot_opt) -> path-type-ok(s, id, ty) }.
 
-// A type `ty0` is compatible with any 0-argument method that returns `ty`
-compatible-ty(ty0, ty) :- // {ty_unpack}
-   ty0 == ty.
-   // unpack-0ary-meth(ty0, ty).
-
-unpack-0ary-meth(ty0, ty1) :- ty0 match
-  { METH([], ty00) -> unpack-0ary-meth(ty00, ty1)
-  | _ -> ty0 == ty1 }.
-
 is-value-type(ty) :- ty match
   { OBJECT(_) -> true
-  | _ -> false
+  | _         -> false
   }.
