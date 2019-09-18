@@ -18,6 +18,7 @@ iimports-selector(s, s_obj, grp) :- grp match
       , new s_imp
       , s -[ `I ]-> s_imp
       , has-decls(s_imp, decls)
+
   | IWild() ->
       s -[ `W ]-> s_obj
 
