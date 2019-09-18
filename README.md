@@ -15,6 +15,43 @@ The following features are specified:
 
 Scoping rules follow the [Scala specification](https://www.scala-lang.org/files/archive/spec/2.13/02-identifiers-names-and-scopes.html).
 
+## Installation
+
+Running the spec on Scala programs requires Ministatix, the Scala spoofax frontend, and
+a Scala compiler to be installed.
+
+Instructions for ministatix can be found in the 
+[MiniStatix](https://github.com/metaborg/ministatix.hs/) repository.
+
+The Scala spoofax frontend can be build using the `scalafront` make target.
+This will download a Spoofax binary and build the parser in a project local directory.
+
+If this recipe does not work for you, please report an 
+[issue](https://github.com/metaborg/ministatix.hs/issues).
+ 
+## Usage
+
+The root of the specification can be found in [src/scala.mstx](./src/scala.mstx).
+
+This repository includes a handcrafted test suite of Scala programs in a subset of
+the official Scala syntax.
+Besides the limitation on the features listed above, a peculiarity of the current parser
+is that it enforces semi-colons after every statement/definition.
+
+You can run the entire test suite using:
+
+    make test-clean test
+
+You can run individual test cases using the `./run a/b/test.{no.}scala` 
+script in the [./test/](./test/) directory.
+This will run the scala compiler on it (assuming it is installed) first.
+The `no` infix in the filename denotes whether the test is expected to typecheck or not.
+
+Then the script will run the spoofax Scala parser to produce an aterm, which
+will then be fed into ministatix along with the specification entrypoint.
+
+Finally the output of both type-checkers is compared to produce a test result.
+
 ## Notes on the implementation
 
 This was developed as a case-study for the query delay mechanism in (Mini)Statix.
