@@ -40,12 +40,12 @@ function-def-ok(s_mod, s, fundef) :- fundef match
   { FunDef(FS(name, None(), params), Some(retty), body) -> 
       {s_fun, tys, cls, ty, mty, s_body}
       new s_fun -> (name, mty)
-      , mty == FUN(tys, ty)
       , s_fun -[ `P ]-> s
       , s_mod -[ `VAL ]-> s_fun
       , no-duplicate-defs(s_mod, name)
 
       , param-clauses-ok(s, s_fun, params, tys)
+      , function-type(tys, ty, mty)
       , type-ok(s, retty, cls)
       , class-instance(cls, ty)
 
@@ -55,6 +55,11 @@ function-def-ok(s_mod, s, fundef) :- fundef match
 
   // type unannotated or generic function defs not supported
   | _ -> false
+  }.
+
+function-type(tys, ty, fty) :- tys match 
+  { []   -> ty == fty
+  | p:ps -> {fty'} function-type(ps, ty, fty'), fty == FUN(p, fty')
   }.
 
 param-clauses-ok(s, s_fun, params, tys) :- params match
