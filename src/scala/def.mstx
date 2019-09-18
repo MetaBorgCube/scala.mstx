@@ -12,12 +12,13 @@ no-duplicate-defs(s, name, ty) :- {defs, matches}
   , singleton(matches).
 
 def-ok(s_mod, s, def) :- def match
-  { TD2DF(typedef) -> type-definition-ok(s_mod, s, typedef)
-  | VD2DF(valdef)  -> val-definition-ok(s_mod, s, valdef)
+  { TD2DF(typedef) -> type-def-ok(s_mod, s, typedef)
+  | VD2DF(valdef)  -> value-def-ok(s_mod, s, valdef)
   | TM2DF(tmpldef) -> template-def-ok(s_mod, s, tmpldef)
+  | FD2DF(fundef)  -> function-def-ok(s_mod, s, fundef)
   }.
   
-val-definition-ok(s_mod, s, valdef) :- valdef match
+value-def-ok(s_mod, s, valdef) :- valdef match
   { ValDef(name, ty, e) -> {s_val, cls, typ}
       new s_val -> (name, typ)
       , s_mod -[ `VAL ]-> s_val 
@@ -30,6 +31,38 @@ template-def-ok(s_mod, s, def) :- def match
   { OD2TM(od) -> object-def-ok(s_mod, s, od)
   }.
 
-type-definition-ok(s_mod, s, tydef) :- tydef match
+type-def-ok(s_mod, s, tydef) :- tydef match
   { TypeDef(name, decl) -> type-decl(s_mod, s, name, decl)
+  }.
+
+function-def-ok(s_mod, s, fundef) :- fundef match
+  // function def without generics and with type annotations
+  { FunDef(FS(name, None(), params), Some(retty), body) -> {s_fun, tys, ty}
+      new s_fun -> (name, METHOD(tys, ty))
+      , s_mod -[ `VAL ]-> s_fun
+
+      , parameters-ok(s, s_fun, params, tys)
+      , type-ok(s, retty, ty)
+
+  // type unannotated or generic function defs not supported
+  | _ -> false
+  }.
+
+parameters-ok(s, s_fun, params, tys) :- params match
+  { []   -> tys == []
+  | p:ps -> {ty, tys'} 
+     param-ok(s, s_fun, p, ty)
+     , parameters-ok(s, s_fun, ps, tys')
+     , tys == ty:tys'
+  }.
+
+param-ok(s, s_fun, param, ty) :- param match
+  // type annotated parameters
+  { Param(id, Some(t)) -> {s_param}
+       type-ok(s, t, ty)
+       , new s_param -> (id, ty)
+       , s_fun -[ `VAL ]-> s_param
+
+  // unannotated parameters not supported
+  | Param(_, None()) -> false
   }.
