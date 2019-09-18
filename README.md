@@ -43,7 +43,7 @@ You can run the entire test suite using:
     make test-clean test
 
 You can run individual test cases using the `./run a/b/test.{no.}scala` 
-script in the [./test/](./test/) directory.
+script in the [./tests/](./tests/) directory.
 This will run the scala compiler on it (assuming it is installed) first.
 The `no` infix in the filename denotes whether the test is expected to typecheck or not.
 
