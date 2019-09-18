@@ -1,5 +1,7 @@
 import scala.def
 import scala.imports
+import scala.type
+import scala.expr
 
 top-statements-ok(s, topstats) :- topstats match
   { st:stmts -> top-statement-ok(s, st), top-statements-ok(s, stmts)
@@ -11,15 +13,21 @@ stmts-ok(s_mod, s, stmts) :- stmts match
   | stmt:stmts -> {s'} stmt-ok(s_mod, s, stmt, s'), stmts-ok(s_mod, s', stmts)
   }.
   
-block-statements-ok(s_mod, s, bstmts, s') :- bstmts match
+block-statements-ok(s_mod, s, bstmts, ty, s') :- bstmts match
   { [] -> s == s'
-  | stmt:stmts -> {si} 
-      block-statement-ok(s_mod, s, stmt, si), 
-      block-statements-ok(s_mod, si, stmts, s')
+  | stmt:stmts -> {si, ty'} 
+      block-statement-ok(s_mod, s, stmt, si, ty'), 
+      block-statements-ok(s_mod, si, stmts, s', ty)
   }.
   
-block-statement-ok(s_mod, s, bstmt, s') :- bstmt match
-  { DF2BS(def) -> def-ok(s_mod, s, def), s' == s
+block-statement-ok(s_mod, s, bstmt, s', ty) :- bstmt match
+  { DF2BS(def) -> 
+        def-ok(s_mod, s, def)
+      , s' == s
+      , predef-type-instance(s, "()", ty)
+  | EX2BS(e) -> 
+        expr-ok(s, e, ty)
+      , s' == s
   }.
 
 // top-level statements

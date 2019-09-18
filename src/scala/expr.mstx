@@ -22,11 +22,14 @@ block-expr-ok(s, be, ty) :- be match
   }.
   
 block-ok(s, bl, ty) :- bl match
-  { Block(bstmts, e) -> {s_block, s'}
+  { Block(bstmts, e) -> {s_block, block_ty, s'}
       new s_block -> BLOCK()
       , s_block -[ `P ]-> s
-      , block-statements-ok(s_block, s_block, bstmts, s')
-      , maybe-expr-ok(s', e, ty)
+      , block-statements-ok(s_block, s_block, bstmts, block_ty, s')
+      , e match 
+        { Some(e') -> expr-ok(s', e', ty)
+        | None()   -> ty == block_ty
+        }
   }.
 
 path-expr-ok(s, p, ty) :- p match
