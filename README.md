@@ -68,7 +68,7 @@ As a work-around for this case-study the label order is built into Ministatix.
 This does not in anyway affect scheduling: the delay mechanism works as described in the
 paper, which does not assume any particular form for the path order.
 
-## Scala precedence as a path order
+### Scala precedence as a path order
 
 Scala paths are of the form: 
 
