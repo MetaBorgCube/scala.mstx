@@ -16,11 +16,11 @@ stmts-ok(s_mod, s, stmts) :- stmts match
 block-statements-ok(s_mod, s, bstmts, ty, s') :- bstmts match
   { [] -> s == s'
   | stmt:stmts -> {si, ty'} 
-      block-statement-ok(s_mod, s, stmt, si, ty'), 
-      block-statements-ok(s_mod, si, stmts, s', ty)
+      block-statement-ok(s_mod, s, stmt, ty', si), 
+      block-statements-ok(s_mod, si, stmts, ty, s')
   }.
   
-block-statement-ok(s_mod, s, bstmt, s', ty) :- bstmt match
+block-statement-ok(s_mod, s, bstmt, ty, s') :- bstmt match
   { DF2BS(def) -> 
         def-ok(s_mod, s, def)
       , s' == s
