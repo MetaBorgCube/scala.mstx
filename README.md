@@ -35,10 +35,17 @@ object Functions {
   def flip(f: Int => Int => Int)(i1 : Int)(i2 : Int): Int = {
     f(i2)(i1)
   };
+  
+  // A nested Functions module.
+  // In Rust, importing the content of the outer Functions object
+  // would result in ambiguity, because the inner one would be revealed and
+  // make the import ambiguous.
+  // In Scala this is fine, because imports open only in subsequent scope.
+  object Functions {};
 };
 
 object Test {
-  import Numbers.{I => Number, _}; // const is is scope as a weak import
+  import Numbers.{I => Number, _}; // const is in scope via the wildcard import
   
   def compute_42(i : Number): Number = {
     val x: Int = const(i)(18);
