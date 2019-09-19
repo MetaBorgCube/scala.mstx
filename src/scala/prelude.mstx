@@ -3,11 +3,10 @@
 prelude-ok(s) :-
     builtin-class(s, "Int")
   , builtin-class(s, "Boolean")
-  , builtin-class(s, "()")
+  , builtin-class(s, "Unit")
   .
 
-builtin-class(s, id) :- {class, s_class}
-    class == CLASS(s_class)
-  , new s_class -> (id, class)
+builtin-class(s, id) :- {s_class}
+    new s_class -> (id, s_class)
   , s -[ `TYPE ]-> s_class
   .

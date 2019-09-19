@@ -27,7 +27,7 @@ disambiguate-object(reach, id, s_obj) :- {matches, ps, p}
   filter reach ((name, _) where name == id) matches
   , min matches scala ps
   , only(ps, p)
-  , datum(p, (id, OBJECT(s_obj))).
+  , datum(p, (id, s_obj)).
 
 // value variable named id is bound in s to a declaration of type ty
 var-ok(s, id, ty) :- {types, matches, visible, sd}

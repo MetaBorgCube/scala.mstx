@@ -4,10 +4,6 @@ import stdlib.paths
 import scala.type.reference
 import scala.paths
 
-class-instance(cls, ty) :- cls match
-  { CLASS(s_cls) -> ty == OBJECT(s_cls)
-  }.
-
 no-duplicate-types(s, name, ty) :- {tydefs, matches}
     query s `TYPE as tydefs
   , filter tydefs ((name', ty') where name' == name) matches
@@ -22,7 +18,17 @@ type-decl(s_mod, s, name, ty) :- {s_ty, typ}
   , type-ok(s, ty, typ).
 
 type-ok(s, t, ty) :- t match
-  { IF2TY(t) -> annot-type-ok(s, t, ty) }.
+  { IF2TY(t) -> annot-type-ok(s, t, ty) 
+  | FunTy(l, r) -> {tyl, tyr} 
+        param-type-ok(s, l, tyl)
+      , type-ok(s, r, tyr)
+      , ty == FUN(tyl, tyr)
+  }.
+  
+param-type-ok(s, t, tys) :- t match
+  { Single(t)    -> {ty} annot-type-ok(s, t, ty), tys == ty:[]
+  | Multiple(ts) -> annot-types-ok(s, ts, tys)
+  }.
 
 path-type-ok(s, p, ty) :- p match
   { UnqualifiedId(id)   -> typeref-ok(s, id, ty)
@@ -35,21 +41,16 @@ path-type-ok(s, p, ty) :- p match
   }.
 
 // check that tyname is a type def ty in Predef reachable from s
-predef-type-ok(s, tyname, ty) :- {tys, ps, p, n}
+predef-type(s, tyname, ty) :- {tys, ps, p, n}
   query s `B*(`P`B*)*`PREDEF`TYPE as tys
   , filter tys ((name, _) where name == tyname) ps
   , only(ps, p)
   , datum(p, (n, ty)).
   
-// ty is an instance type of a type named tyname in Predef reachable from s
-predef-type-instance(s, tyname, ty) :- {cls}
-  predef-type-ok(s, tyname, cls)
-  , class-instance(cls, ty).
-
 annot-type-ok(s, annot_t, ty) :- annot_t match
   { ST2AT(id, annot_opt) -> path-type-ok(s, id, ty) }.
-
-is-value-type(ty) :- ty match
-  { OBJECT(_) -> true
-  | _         -> false
+  
+annot-types-ok(s, ts, tys) :- ts match
+  { []   -> tys == []
+  | t:ts -> {ty, tys'} annot-type-ok(s, t, ty), annot-types-ok(s, ts, tys'), tys == ty:tys'
   }.

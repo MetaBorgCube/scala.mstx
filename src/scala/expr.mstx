@@ -1,4 +1,5 @@
 import stdlib.paths
+import stdlib.lists
 
 import scala.type
 import scala.type.reference
@@ -9,12 +10,21 @@ expr-ok(s, e, ty) :- e match
   { Lit(l)       -> literal-ok(s, l, ty)
   | PathExpr(pe) -> path-expr-ok(s, pe, ty)
   | BE2EX(be)    -> block-expr-ok(s, be, ty)
+  | Call(f, es)  -> {paramtys, argtys}
+        expr-ok(s, f, FUN(paramtys, ty))
+      , exprs-ok(s, es, argtys)
+      , pointwise-equal(paramtys, argtys)
   | _            -> false // other expressions are not supported
+  }.
+  
+exprs-ok(s, es, tys) :- es match
+  { [] -> tys == []
+  | e:es -> {ty, tys'} expr-ok(s, e, ty), exprs-ok(s, es, tys'), tys == ty:tys'
   }.
 
 maybe-expr-ok(s, me, ty) :- me match
   { Some(e) -> expr-ok(s, e, ty)
-  | None()  -> predef-type-instance(s, "()", ty)
+  | None()  -> predef-type(s, "Unit", ty)
   }.
 
 block-expr-ok(s, be, ty) :- be match
@@ -43,6 +53,6 @@ path-expr-ok(s, p, ty) :- p match
   }.
 
 literal-ok(s, l, ty) :- l match
-  { IntLit(n)   -> predef-type-instance(s, "Int", ty)
-  | BoolLit(b)  -> predef-type-instance(s, "Boolean", ty)
+  { IntLit(n)   -> predef-type(s, "Int", ty)
+  | BoolLit(b)  -> predef-type(s, "Boolean", ty)
   }.

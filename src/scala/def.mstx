@@ -18,12 +18,11 @@ def-ok(s_mod, s, def) :- def match
   }.
   
 value-def-ok(s_mod, s, valdef) :- valdef match
-  { ValDef(name, ty, e) -> {s_val, cls, typ}
+  { ValDef(name, ty, e) -> {s_val, typ}
       new s_val -> (name, typ)
       , s_mod -[ `VAL ]-> s_val 
-      , type-ok(s, ty, cls)
+      , type-ok(s, ty, typ)
       , expr-ok(s, e, typ)
-      , class-instance(cls, typ) 
       , no-duplicate-defs(s_mod, name)
   }.
 
@@ -38,7 +37,7 @@ type-def-ok(s_mod, s, tydef) :- tydef match
 function-def-ok(s_mod, s, fundef) :- fundef match
   // function def without generics and with type annotations
   { FunDef(FS(name, None(), params), Some(retty), body) -> 
-      {s_fun, tys, cls, ty, mty, s_body}
+      {s_fun, tys, ty, mty, s_body}
       new s_fun -> (name, mty)
       , s_fun -[ `P ]-> s
       , s_mod -[ `VAL ]-> s_fun
@@ -46,8 +45,7 @@ function-def-ok(s_mod, s, fundef) :- fundef match
 
       , param-clauses-ok(s, s_fun, params, tys)
       , function-type(tys, ty, mty)
-      , type-ok(s, retty, cls)
-      , class-instance(cls, ty)
+      , type-ok(s, retty, ty)
 
       , new s_body -> BODY()
       , s_body -[ `P ]-> s_fun
@@ -83,9 +81,8 @@ params-ok(s, s_fun, params, tys) :- params match
 
 param-ok(s, s_fun, param, ty) :- param match
   // type annotated parameters
-  { Param(id, Some(t)) -> {s_param, cls}
-       type-ok(s, t, cls)
-       , class-instance(cls, ty)
+  { Param(id, Some(t)) -> {s_param}
+       type-ok(s, t, ty)
        , new s_param -> (id, ty)
        , s_fun -[ `VAL ]-> s_param
 

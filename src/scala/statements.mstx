@@ -13,21 +13,25 @@ stmts-ok(s_mod, s, stmts) :- stmts match
   | stmt:stmts -> {s'} stmt-ok(s_mod, s, stmt, s'), stmts-ok(s_mod, s', stmts)
   }.
   
-block-statements-ok(s_mod, s, bstmts, ty, s') :- bstmts match
+block-statements-ok(s_block, s, bstmts, ty, s') :- bstmts match
   { [] -> s == s'
   | stmt:stmts -> {si, ty'} 
-      block-statement-ok(s_mod, s, stmt, ty', si), 
-      block-statements-ok(s_mod, si, stmts, ty, s')
+      block-statement-ok(s_block, s, stmt, ty', si), 
+      block-statements-ok(s_block, si, stmts, ty, s')
   }.
   
-block-statement-ok(s_mod, s, bstmt, ty, s') :- bstmt match
+block-statement-ok(s_block, s, bstmt, ty, s') :- bstmt match
   { DF2BS(def) -> 
-        def-ok(s_mod, s, def)
+        def-ok(s_block, s, def)
       , s' == s
-      , predef-type-instance(s, "()", ty)
+      , predef-type(s, "Unit", ty)
   | EX2BS(e) -> 
         expr-ok(s, e, ty)
       , s' == s
+  | IM2BS(ie) ->
+        new s'
+      , s' -[ `B ]-> s
+      , import-ok(s', s_block, ie)
   }.
 
 // top-level statements

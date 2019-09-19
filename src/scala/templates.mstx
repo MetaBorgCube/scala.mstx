@@ -3,19 +3,18 @@ import scala.statements
 import scala.type
 import scala.expr
 
-no-duplicate-values(s, name, ty) :- {defs, matches}
+no-duplicate-values(s, name) :- {defs, matches}
     query s `VAL as defs
-  , filter defs ((name', ty') where name' == name) matches
+  , filter defs ((name', _) where name' == name) matches
   , singleton(matches).
 
 object-def-ok(s_mod, s, def) :- def match
-  { ObjectDef(name, ext_clause, body) -> {s_obj, s_imp, self}
-      self == OBJECT(s_obj)
-    , new s_obj -> (name, self)
+  { ObjectDef(name, ext_clause, body) -> {s_obj, s_imp}
+      new s_obj -> (name, s_obj)
 
     // declare
     , s_mod -[ `VAL ]-> s_obj
-    , no-duplicate-values(s_mod, name, self)
+    , no-duplicate-values(s_mod, name)
 
     // link the object
     , s_obj -[ `P ]-> s

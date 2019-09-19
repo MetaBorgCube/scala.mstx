@@ -12,3 +12,9 @@ append(xs, ys, zs) :- xs match
       append(xs, ys, zs0)
     , zs == x:zs0
   }.
+
+pointwise-equal(xs, ys) :- (xs, ys) match
+  { ([], [])     -> true
+  | (x:xs, y:ys) -> x == y, pointwise-equal(xs, ys)
+  | _            -> false
+  }.
