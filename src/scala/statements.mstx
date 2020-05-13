@@ -29,9 +29,10 @@ block-statement-ok(s_block, s, bstmt, ty, s') :- bstmt match
         expr-ok(s, e, ty)
       , s' == s
   | IM2BS(ie) ->
+        // s' is the import scope
         new s'
       , s' -[ `B ]-> s
-      , import-ok(s', s_block, ie)
+      , import-ok(s', s, ie)
   }.
 
 // top-level statements
