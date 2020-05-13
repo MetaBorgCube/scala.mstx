@@ -72,7 +72,10 @@ a Scala compiler to be installed.
 Instructions for MiniStatix can be found in the 
 [MiniStatix](https://github.com/metaborg/ministatix.hs/) repository.
 
-The Scala Spoofax frontend can be build using the `scalafront` make target.
+To build the Scala Spoofax frontend, initialize the submodule and build using the `scalafront` target:
+
+    git submodule init && git submodule update && make scalafront
+
 This will download a Spoofax binary and build the parser in a project local directory.
 
 If this recipe does not work for you, please report an 
