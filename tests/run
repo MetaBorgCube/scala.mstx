@@ -22,7 +22,7 @@ if [ ! -d "$SCALADIR" ]; then
     exit 1
 fi
 
-readonly SUNSHINE_JAR="$DIR/../bin/org.metaborg.sunshine2-2.5.2.jar"
+readonly SUNSHINE_JAR="$DIR/../../sunshine.jar"
 if [ ! -f "$SUNSHINE_JAR" ]; then
     printf "[$PANIC] Cannot find file $SUNSHINE_JAR\n"
     exit 1
