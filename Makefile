@@ -1,7 +1,6 @@
 # paths
 SCALA_FRONT  =  lib/scala.spfx/lang.scala.sdf3/
-SUNSHINE_URL =  http://artifacts.metaborg.org/service/local/repositories/releases/content/org/metaborg/org.metaborg.sunshine2/2.5.2/org.metaborg.sunshine2-2.5.2.jar
-SUNSHINE_JAR =  bin/org.metaborg.sunshine2-2.5.2.jar
+SUNSHINE_JAR =  ../sunshine.jar
 SPEC         =  src/scala.mstx
 TESTDIR      ?= tests/   # directory
 TESTRE       ?= '*.scala' # iname
@@ -30,23 +29,15 @@ all: test
 bin:
 	mkdir -p bin
 
-# get spoofax sunshine
-bin/org.metaborg.sunshine2-2.5.2.jar: bin
-	curl $(SUNSHINE_URL) -o $(SUNSHINE_JAR)
-
-# ensure that spoofax sunshine is available
-sunshine: bin/org.metaborg.sunshine2-2.5.2.jar
-
 # compile the scala frontend
 lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-0.1.0-SNAPSHOT.spoofax-language: $(SCALA_FRONT)
 	cd $(SCALA_FRONT) && $(MAVEN) verify
 
 # ensure the java spoofax language frontend is compiled and available
-scalafront: lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-0.1.0-SNAPSHOT.spoofax-language sunshine
+scalafront: lib/scala.spfx/lang.scala.sdf3/target/lang.scala.sdf3-0.1.0-SNAPSHOT.spoofax-language
 
 scalafront-clean:
 	cd $(SCALA_FRONT) && $(MAVEN) clean
-
 
 ## Testing
 
