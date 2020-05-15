@@ -69,17 +69,13 @@ Scoping rules follow the [Scala specification](https://www.scala-lang.org/files/
 Running the spec on Scala programs requires MiniStatix, the Scala Spoofax frontend, and
 a Scala compiler to be installed.
 
-Instructions for MiniStatix can be found in the 
-[MiniStatix](https://github.com/metaborg/ministatix.hs/) repository.
+Instructions for MiniStatix can be found in the MiniStatix directory.
 
 To build the Scala Spoofax frontend, initialize the submodule and build using the `scalafront` target:
 
     git submodule init && git submodule update && make scalafront
 
 This will download a Spoofax binary and build the parser in a project local directory.
-
-If this recipe does not work for you, please report an 
-[issue](https://github.com/metaborg/ministatix.hs/issues).
  
 ## Usage
 
