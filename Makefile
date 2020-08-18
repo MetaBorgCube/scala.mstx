@@ -4,20 +4,18 @@ SPFX_VERSION =  2.5.11
 SUNSHINE_URL =  http://artifacts.metaborg.org/service/local/repositories/releases/content/org/metaborg/org.metaborg.sunshine2/$(SPFX_VERSION)/org.metaborg.sunshine2-$(SPFX_VERSION).jar
 SUNSHINE_JAR =  bin/org.metaborg.sunshine2-$(SPFX_VERSION).jar
 SPEC         =  src/scala.mstx
-TESTDIR      ?= tests/   # directory
+TESTS        ?= tests/    # directory
 TESTRE       ?= '*.scala' # iname
 
 ## external commands with configuration
 MAVEN_OPTS   = "-Xms512m -Xmx1024m -Xss16m"
 MAVEN        = MAVEN_OPTS=$(MAVEN_OPTS) mvn
 SUNSHINE     = java -jar $(SUNSHINE_JAR)
-PARSE        = $(SUNSHINE) parse -l $(SCALA_FRONT) -p . -i 
+PARSE        = $(SUNSHINE) parse -l $(SCALA_FRONT) -p . -i
 STATIX       = statix $(SPEC)
 SCALAC       = scalac
 
-TESTS        = $(shell find $(TESTDIR) -name $(TESTRE))
-
-TEST_TARGETS = $(TESTS:%.scala=%.result)
+TEST_SOURCES = $(shell find $(TESTS) -type f -name $(TESTRE))
 
 .PHONY: all test
 .PRECIOUS: %.aterm
@@ -58,19 +56,12 @@ scalafront-clean:
 	$(PARSE_SCALA) $(<:%.scala=%.sca) > $@
 	rm -f $(<:%.scala=%.sca)
 
-%.result: %.scala src/
-	@./tests/run $< | tee $@ | grep -i "failure\|success\|panic"
-
-test: $(TEST_TARGETS)
-test-results: 
-	find . -name '*.result' -exec sh -c "cat {} | grep -i 'failure\|success\|panic'" \;
+test: $(TEST_SOURCES)
+	@./tests/run $(TEST_SOURCES) | grep '[\[]SUCCESS\|FAILURE'
 
 ## Building
 
 ## Cleaning
 
 test-clean:
-	find . -name "*.class" -exec rm {} \;
-	find . -name "*.aterm" -exec rm {} \;
-	find . -name "*.result" -exec rm {} \;
-	find . -name "*.out" -exec rm {} \;
+	-@rm -rf _build

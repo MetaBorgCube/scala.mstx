@@ -1,89 +1,14 @@
 #!/usr/bin/env bash
-
-set -eu
-
-if true || test -t 1; then
-   SUCCESS="\e[32mSUCCESS\e[0m"
-   FAILURE="\e[31mFAILURE\e[0m"
-   PANIC="\e[34mPANIC\e[0m"
-else
-   SUCCESS="SUCCESS"
-   FAILURE="FAILURE"
-   PANIC="PANIC"
-fi
+set -e
 
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-readonly BUILD="$DIR/../build/"
-mkdir -p $BUILD
 
-readonly SCALADIR="$DIR/../lib/scala.spfx/lang.scala.sdf3"
-if [ ! -d "$SCALADIR" ]; then
-    echo "FAILURE: Cannot find directory $SCALADIR"
-    exit 1
-fi
-
-readonly SUNSHINE_JAR="$DIR/../bin/org.metaborg.sunshine2-2.5.11.jar"
-if [ ! -f "$SUNSHINE_JAR" ]; then
-    printf "[$PANIC] Cannot find file $SUNSHINE_JAR\n"
-    exit 1
-fi
-
-readonly SUNSHINE="java -jar $SUNSHINE_JAR"
-
-statix check -I $DIR/../src/ scala 2>&1
-stx_runs=${PIPESTATUS[0]}
-if [ ! $stx_runs ]; then
-    printf "[$PANIC] Cannot run statix\n"
-    exit 1
-fi
-
-function expect {
-    if [ $1 -eq 0 ]; then printf "pass"; else printf "fail"; fi
-}
-
-function agree {
-    [ $1 -eq 0 -a $2 -eq 0 ] || [ $1 -ne 0 -a $2 -ne 0 ]
-}
-
-for infile in "$@"
-do
-    testname="${infile%.java}"
-
-    if ! (echo "$testname" | grep -s "\.no")
-    then
-        positive=0
-    else
-        positive=1
-    fi
-    echo "Expect $(expect $positive)"
-
-    # run scala compiler
-    scalac -d $BUILD $infile 2>&1 | tee ${infile%.scala}.scalac.out 
-    scala_ok=${PIPESTATUS[0]}
-    echo "scalac $(expect $scala_ok)"
-    if ! agree $scala_ok $positive; then
-        printf "[$PANIC:DISAGREE] $infile\n"
-        continue
-    fi
-
-    # compile the file to an aterm
-    sca=${infile%.scala}.sca3
-    cp "$infile" $sca
-    ${SUNSHINE} parse -l "${SCALADIR}" -p . -i "$sca" > ${infile%.scala}.aterm 2> /dev/null || {
-        printf "[$PANIC:PARSING] $infile\n"
-        continue
-    }
-
-    # run statix on the aterm
-    statix check -I $DIR/../src/ scala ${infile%.scala}.aterm 2>&1 | tee ${infile%.scala}.stx.out
-    stx_ok=${PIPESTATUS[0]}
-
-    # compute test result by comparison
-    if [ $stx_ok -eq 65 ]; then
-        printf "[$PANIC:STUCK] $infile\n"
-    elif agree $stx_ok $positive; then
-        printf "[$SUCCESS] $infile\n"
-    else
-        printf "[$FAILURE] $infile\n"
-    fi
+for testfile in "$@"; do
+  stack runghc \
+        --resolver lts-16.10 \
+        --package shake \
+        --package regex-base \
+        --package regex-tdfa \
+        --package strip-ansi-escape \
+        $DIR/runner.hs $DIR/../src/ $testfile
 done

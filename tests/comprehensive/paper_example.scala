@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object a {
   object b {
     def f(): Unit = {};

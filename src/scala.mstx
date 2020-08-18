@@ -7,10 +7,14 @@ main(prog) :- {s}
   // and populate it
   new s
   , prelude-ok(s)
+  , compilation-units-ok(s, prog).
 
-  , compilation-unit-ok(s, prog).
+compilation-units-ok(s, cus) :- cus match
+  { []      -> true
+  | cu:cus' -> compilation-unit-ok(s, cu), compilation-units-ok(s, cus')
+  }.
 
-compilation-unit-ok(s, cu) :- {s_prelude, s_cu}
+compilation-unit-ok(s, cu) :- {s_cu}
   new s_cu
 
   // the implicit import to the predef:
