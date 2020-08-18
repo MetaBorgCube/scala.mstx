@@ -1,4 +1,4 @@
-STATIX fail stdlib\.sets\.same-target.*\"x\"
+STATIX fail stdlib\.sets\.same-target
 SCALAC fail x is already defined as value x
 
 
