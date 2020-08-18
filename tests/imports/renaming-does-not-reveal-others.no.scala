@@ -1,3 +1,6 @@
+STATIX fail scala\.type\.reference\.typeref-ok.*\"Y\"
+SCALAC fail not found\: type Y
+
 object O {
   object N {
     type X = Int;

@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object O {
   def f(x: Int, y: Int)(z : Boolean, m: Int): Boolean = {
     val x2: Int = x;

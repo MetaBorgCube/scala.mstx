@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object I {
 };
 object O1 {

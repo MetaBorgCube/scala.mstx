@@ -1,3 +1,6 @@
+STATIX fail stdlib\.sets\.same-target
+SCALAC fail reference to y is ambiguous
+
 object O {
   object N {
     val x : Int = 42;

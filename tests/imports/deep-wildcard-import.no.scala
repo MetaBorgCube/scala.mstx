@@ -1,3 +1,6 @@
+STATIX fail scala\.expr\.path-expr-ok.*\"x\"
+SCALAC fail not found\: value x
+
 object O1 {
   type T = Boolean;
   object O2 {

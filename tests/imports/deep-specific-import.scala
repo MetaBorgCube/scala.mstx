@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object O1 {
   type T = Boolean;
   object O2 {

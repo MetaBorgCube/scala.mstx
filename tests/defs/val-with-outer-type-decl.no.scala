@@ -1,3 +1,6 @@
+STATIX fail
+SCALAC fail
+
 object O {
   type J = Int;
   object P {

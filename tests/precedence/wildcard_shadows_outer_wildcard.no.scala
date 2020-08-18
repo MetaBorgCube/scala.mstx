@@ -1,3 +1,6 @@
+STATIX fail unification error
+SCALAC fail required\: O\.N\.A
+
 object O {
   object M {
     type A = Int;

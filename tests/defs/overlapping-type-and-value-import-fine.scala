@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object O {
   object A {
     type x = Int;

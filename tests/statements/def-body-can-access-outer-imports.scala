@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object N {
   val x : Int = 42;
 };

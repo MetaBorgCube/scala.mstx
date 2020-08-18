@@ -1,3 +1,6 @@
+STATIX fail scala\.type\.path-type-ok.*\"X\"
+SCALAC fail not found\: type X
+
 object O {
   object N {
     type X = Int;

@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object c {
   def g(): Unit = { 
     import a.{h => _, b};

@@ -1,3 +1,6 @@
+STATIX ok
+SCALAC ok
+
 object N {
   type X = Int;
 };

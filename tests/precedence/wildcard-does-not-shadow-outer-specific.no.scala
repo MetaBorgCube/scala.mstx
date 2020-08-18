@@ -1,3 +1,6 @@
+STATIX fail stdlib\.sets\.same-target
+SCALAC fail reference to A is ambiguous
+
 object O {
   object M {
     type A = Int;
@@ -9,6 +12,6 @@ object O {
   import M.A;
   object I {
     import N._;
-    val x : A = 3;
+    val x : A = true;
   };
 };
