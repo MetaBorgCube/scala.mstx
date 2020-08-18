@@ -4,11 +4,5 @@ set -e
 readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 for testfile in "$@"; do
-  stack runghc \
-        --resolver lts-16.10 \
-        --package shake \
-        --package regex-base \
-        --package regex-tdfa \
-        --package strip-ansi-escape \
-        $DIR/runner.hs $DIR/../src/ $testfile
+  $DIR/runner $DIR/../src/ $testfile
 done

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+readonly DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+stack ghc \
+        --resolver lts-16.10 \
+        --package shake \
+        --package regex-base \
+        --package regex-tdfa \
+        --package strip-ansi-escape \
+        $DIR/runner.hs
+
+rm runner.hi
+rm runner.o

@@ -56,7 +56,10 @@ scalafront-clean:
 	$(PARSE_SCALA) $(<:%.scala=%.sca) > $@
 	rm -f $(<:%.scala=%.sca)
 
-test: $(TEST_SOURCES)
+tests/runner: tests/runner.hs
+	cd tests && ./build
+
+test: $(TEST_SOURCES) tests/runner
 	@./tests/run $(TEST_SOURCES) | grep '[\[]SUCCESS\|FAILURE'
 
 ## Building
