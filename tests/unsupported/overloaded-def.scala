@@ -1,5 +1,5 @@
 STATIX fail
-SCALAC fail
+SCALAC ok
 
 object A {
   def f(x: Int): Int = 42;
